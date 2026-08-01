@@ -413,7 +413,7 @@ img{max-width:100%;height:auto;display:block}
    КАРТА И КОНТАКТЫ
    ========================================================================== */
 .map{border-radius:var(--r-md);overflow:hidden;background:var(--ink)}
-.map iframe{display:block;width:100%;height:clamp(300px,42vw,440px);border:0;filter:grayscale(1)}
+.map iframe{display:block;width:100%;height:clamp(300px,42vw,440px);border:0}   /* карта цветная — намеренно */
 .map__stub{
   height:clamp(300px,42vw,440px);display:grid;place-items:center;gap:.75rem;
   text-align:center;color:rgba(255,255,255,.85);padding:2rem;
@@ -457,22 +457,26 @@ img{max-width:100%;height:auto;display:block}
    ========================================================================== */
 /* Прячем только при работающем скрипте: если он не выполнится,
    страница останется полностью читаемой, а не пустой. */
-.js [data-anim]{opacity:0;transition:opacity .8s ease,transform .8s ease}
-.js [data-anim="zoomin"]     {transform:scale(.9)}
-.js [data-anim="fadeinright"]{transform:translateX(60px)}
-.js [data-anim="fadeinleft"] {transform:translateX(-60px)}
-.js [data-anim="fadeindown"] {transform:translateY(-40px)}
-.js [data-anim="fadeinup"]   {transform:translateY(40px)}
+.js [data-anim]{
+  opacity:0;
+  transition:opacity .9s cubic-bezier(.16,.84,.44,1),
+             transform .9s cubic-bezier(.16,.84,.44,1);
+}
+.js [data-anim="zoomin"]     {transform:scale(.86)}
+.js [data-anim="fadeinright"]{transform:translateX(80px)}
+.js [data-anim="fadeinleft"] {transform:translateX(-80px)}
+.js [data-anim="fadeindown"] {transform:translateY(-55px)}
+.js [data-anim="fadeinup"]   {transform:translateY(55px)}
 .js [data-anim].is-in{opacity:1;transform:none}
 
 /* На телефоне разбег меньше: там до края экрана ближе и длинный сдвиг
    читается как рывок. */
 @media (max-width:640px){
-  .js [data-anim="fadeinright"]{transform:translateX(28px)}
-  .js [data-anim="fadeinleft"] {transform:translateX(-28px)}
-  .js [data-anim="fadeindown"] {transform:translateY(-22px)}
-  .js [data-anim="fadeinup"]   {transform:translateY(22px)}
-  .js [data-anim="zoomin"]     {transform:scale(.94)}
+  .js [data-anim="fadeinright"]{transform:translateX(46px)}
+  .js [data-anim="fadeinleft"] {transform:translateX(-46px)}
+  .js [data-anim="fadeindown"] {transform:translateY(-38px)}
+  .js [data-anim="fadeinup"]   {transform:translateY(38px)}
+  .js [data-anim="zoomin"]     {transform:scale(.9)}
 }
 
 @media (prefers-reduced-motion:reduce){
@@ -1111,9 +1115,14 @@ img{max-width:100%;height:auto;display:block}
     io.unobserve(el);
   };
 
+  /* Блок начинает появляться, когда заехал на экран примерно на пятую часть.
+     Если запускать сразу у нижней кромки, анимация успевает доиграть, пока
+     блок ещё внизу, — и кажется, что её нет вовсе. */
+  const TRIGGER = 0.8;
+
   const io = new IntersectionObserver((entries) => {
     entries.forEach(entry => { if (entry.isIntersecting) show(entry.target); });
-  }, { rootMargin: "0px 0px -8% 0px" });
+  }, { rootMargin: `0px 0px -${Math.round((1 - TRIGGER) * 100)}% 0px` });
   animated.forEach(el => io.observe(el));
 
   /* Страховка. При быстром пролистывании наблюдатель не успевает заметить
@@ -1123,9 +1132,9 @@ img{max-width:100%;height:auto;display:block}
   let queued = false;
   const sweep = () => {
     queued = false;
-    const bottom = innerHeight;
+    const line = innerHeight * TRIGGER;
     [...pending].forEach(el => {
-      if (el.getBoundingClientRect().top < bottom) show(el);
+      if (el.getBoundingClientRect().top < line) show(el);
     });
     if (!pending.size) {
       removeEventListener("scroll", onMove);
