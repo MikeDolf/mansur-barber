@@ -204,14 +204,22 @@ img{max-width:100%;height:auto;display:block}
 @media (max-width:960px){
   .burger{display:block}
   .nav__menu{
-    position:fixed;inset:var(--nav-h) 0 auto;background:rgba(0,0,0,.98);
+    position:fixed;inset:var(--nav-h) 0 auto;background:#000;
     display:none;flex-direction:column;align-items:stretch;gap:0;
     padding:.5rem 1.25rem 1.75rem;max-height:calc(100dvh - var(--nav-h));overflow-y:auto;
   }
   .nav__menu[data-open="true"]{display:flex}
   .nav__group,.nav__links{flex-direction:column;align-items:stretch;gap:0;width:100%}
   .nav__right{align-items:stretch}
-  .nav__links a{font-size:1.125rem;padding:.9rem 0;border-bottom:1px solid rgba(255,255,255,.12)}
+  /* display:block обязателен: у строчной ссылки вертикальный отступ не
+     раздвигает строку, и нижняя граница уезжает на соседний пункт,
+     перечёркивая его. Ширина границы тогда тоже равна длине слова. */
+  .nav__links a{
+    display:block;font-size:1.125rem;padding:.9rem 0;
+    border-bottom:1px solid rgba(255,255,255,.12);
+  }
+  .nav__links li:last-child a{border-bottom:0}   /* не оставляем висящую линию над иконками */
+  .nav__links a::after{display:none}             /* разделители уже есть, подчёркивание лишнее */
   .nav__social{padding-top:1.25rem;justify-content:center}
 }
 @media (min-width:961px){
