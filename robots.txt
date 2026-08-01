@@ -1,0 +1,5 @@
+# Демо. На project-страницах GitHub этот файл поисковиками не читается —
+# он здесь для порядка. Реально закрывает <meta name="robots" content="noindex">
+# в index.html.
+User-agent: *
+Disallow: /

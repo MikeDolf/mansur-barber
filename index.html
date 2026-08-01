@@ -1,0 +1,1186 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- ============================================================
+     ВРЕМЕННО. Только для демо-версии на GitHub Pages.
+     Строка ниже запрещает поисковикам показывать сайт в выдаче.
+     ПЕРЕД ЗАПУСКОМ БОЕВОГО САЙТА — УДАЛИТЬ ЭТУ СТРОКУ,
+     иначе сайт никогда не появится в поиске.
+     В основном index.html этой строки нет.
+     ============================================================ -->
+<meta name="robots" content="noindex, nofollow">
+
+<!-- ==========================================================================
+     Мансур-Барбер · Екатеринбург, ул. Радищева, 33 (OXYGEN)
+
+     ПОДСТАВЛЕНО: имя, адрес, телефон, мессенджеры, онлайн-запись,
+     12 услуг с ценами, 4 отзыва с Яндекс.Карт, график работы, карта,
+     портрет мастера, фото салона, разметка для поисковиков.
+
+     ОСТАЛОСЬ:
+       https://example.ru → домен, когда появится (canonical, og:url, JSON-LD)
+       Фотографии         → 12 заглушек <div class="ph">; главные —
+                            пары «до/после» и портреты клиентов к отзывам
+
+     ФОТО: менять на <img class="photo" src="img/файл.jpg" alt="описание"
+     width="…" height="…" loading="lazy" decoding="async">.
+     Все фото автоматически становятся ч/б — это фирменный приём.
+     Инструкция целиком — в README.md
+     ========================================================================== -->
+
+<title>Мансур-Барбер — мужские стрижки в Екатеринбурге, ул. Радищева, 33</title>
+<meta name="description" content="Барбер Мансур в Екатеринбурге, салон красоты OXYGEN на Радищева, 33. Мужские, студенческие и детские стрижки, оформление бороды и усов, экспресс-бритьё. Ежедневно 10:00–21:00. Онлайн-запись, WhatsApp, Telegram. +7 (922) 157-54-87.">
+
+<link rel="canonical" href="https://example.ru/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://example.ru/">
+<meta property="og:title" content="Мансур-Барбер — мужские стрижки в Екатеринбурге">
+<meta property="og:description" content="Мужские стрижки с индивидуальным подходом, под ваш стиль и образ. Салон OXYGEN на Радищева, 33, Екатеринбург.">
+<meta property="og:image" content="https://example.ru/img/og.jpg">
+<meta property="og:locale" content="ru_RU">
+<meta name="theme-color" content="#000000">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+
+<style>
+/* ==========================================================================
+   ТОКЕНЫ
+   ========================================================================== */
+:root{
+  --ink:       #000000;
+  --paper:     #ffffff;
+  --stone-100: #e4e4e4;   /* светлые полосы и карточки отзывов */
+  --stone-200: #cccccc;   /* блок контактов */
+  --stone-300: #c4c0c0;   /* прайс, панель «атмосфера» */
+  --stone-600: #757575;   /* график работы */
+  --line:       rgba(0,0,0,.18);
+
+  --r-lg: 42px;   /* кнопки, карточки, крупные фото */
+  --r-md: 30px;   /* фото студии */
+  --r-sm: 6px;
+
+  --fs-display: clamp(2rem, 5.2vw, 4rem);
+  --fs-h2:      clamp(1.75rem, 3.4vw, 2.75rem);
+  --fs-lead:    clamp(1.0625rem, 1.5vw, 1.375rem);
+  --fs-body:    clamp(1rem, 1.15vw, 1.0625rem);
+  --fs-sm:      .9375rem;
+  --fs-xs:      .8125rem;
+
+  --gap:   clamp(1.25rem, 3vw, 2.5rem);
+  --band:  clamp(3.5rem, 8vw, 7rem);
+  --shell: 1200px;
+  --nav-h: 104px;
+
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
+          Arial, "Noto Sans", sans-serif;
+}
+@media (max-width:960px){ :root{ --nav-h:64px } }
+
+/* Оформление намеренно одноцветное — это фирменный стиль, а не тема
+   интерфейса. Цвета заданы явно, поэтому страница выглядит одинаково
+   при светлой и тёмной системной теме. */
+
+/* ==========================================================================
+   БАЗА
+   ========================================================================== */
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;overflow-x:clip}   /* блоки въезжают сбоку — обрезаем, не даём горизонтальный скролл */
+body{
+  margin:0;
+  font-family:var(--font);
+  font-size:var(--fs-body);
+  line-height:1.6;
+  color:var(--ink);
+  background:var(--paper);
+  overflow-x:clip;
+}
+a{color:inherit}
+h1,h2,h3{margin:0;line-height:1.12;text-wrap:balance;font-weight:700}
+p{margin:0}
+ul{margin:0;padding:0;list-style:none}
+:focus-visible{outline:3px solid #fff;outline-offset:2px;box-shadow:0 0 0 6px rgba(0,0,0,.55)}
+
+/* ФИРМЕННЫЙ ПРИЁМ: все фотографии чёрно-белые.
+   Чтобы вернуть цвет — удалить это правило. */
+img, .ph{filter:grayscale(1)}
+img{max-width:100%;height:auto;display:block}
+
+.shell{width:min(100% - 2.5rem, var(--shell));margin-inline:auto}
+.band{padding-block:var(--band)}
+.center{text-align:center}
+.section-head{padding-bottom:clamp(2.5rem,5vw,4rem)}
+.section-head--wide{padding-bottom:clamp(3.5rem,5vw,5rem)}
+.stack{display:grid;gap:clamp(2rem,5vw,4rem)}        /* пара ползунков «до/после» */
+.stack--tight{gap:clamp(1.5rem,3vw,2.5rem)}
+.rule{height:2px;background:currentColor;opacity:.55;max-width:140px}
+
+.skip{
+  position:absolute;top:0;left:0;z-index:200;
+  background:var(--ink);color:#fff;padding:.75rem 1.25rem;
+  clip-path:inset(50%);          /* прячем без выноса за экран, иначе появляется лишняя ширина */
+}
+.skip:focus{clip-path:none}
+
+/* ==========================================================================
+   ТИПОГРАФИКА
+   ========================================================================== */
+.display{font-size:var(--fs-display);font-weight:700;line-height:1.15}
+.h2{font-size:var(--fs-h2)}
+.lead{font-size:var(--fs-lead);line-height:1.5}
+.measure{max-width:56ch}
+
+/* ==========================================================================
+   КНОПКА  +  бегущий блик (фирменная деталь оригинала)
+   ========================================================================== */
+.btn{
+  position:relative;overflow:hidden;isolation:isolate;
+  display:inline-flex;align-items:center;justify-content:center;
+  min-height:60px;padding:.9rem 2.75rem;
+  background:var(--ink);color:#fff;
+  border:1px solid var(--ink);border-radius:var(--r-lg);
+  font:inherit;font-weight:600;text-decoration:none;cursor:pointer;
+  transition:background-color .2s ease,color .2s ease,box-shadow .2s ease,transform .2s ease;
+}
+.btn > span{position:relative;z-index:1}
+.btn::after{               /* сам блик */
+  content:"";position:absolute;inset:0 auto 0 30px;width:45px;
+  background:linear-gradient(90deg,rgba(255,255,255,.1),rgba(255,255,255,.4));
+  transform:skewX(-45deg) translateX(-85px);
+  animation:flash 3s linear infinite;
+}
+@keyframes flash{
+  20%,100%{transform:skewX(-45deg) translateX(60vw)}
+}
+.btn:hover{
+  background:#9f9898;color:var(--ink);
+  box-shadow:0 10px 20px rgba(0,11,48,.25);
+  transform:translateY(-2px);
+}
+.btn--ondark{border-color:rgba(255,255,255,.9)}
+.btn-row{display:flex;justify-content:center;padding-top:clamp(2rem,4vw,3rem)}
+
+/* ==========================================================================
+   НАВИГАЦИЯ
+   ========================================================================== */
+.nav{
+  position:fixed;inset-inline:0;top:0;z-index:100;
+  background:rgba(0,0,0,.9);color:#fff;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+}
+.nav__inner{
+  width:min(100% - 2.5rem, 1560px);margin-inline:auto;
+  min-height:var(--nav-h);
+  display:flex;align-items:center;justify-content:space-between;gap:1.5rem;
+}
+.nav__brand{font-weight:800;text-decoration:none;font-size:1.0625rem;white-space:nowrap}
+.nav__group{display:flex;align-items:center;gap:clamp(1rem,2vw,2.25rem)}
+.nav__right{flex-direction:column;align-items:flex-end;gap:.5rem}
+.nav__links{display:flex;align-items:center;gap:clamp(1rem,2vw,2.25rem)}
+.nav__links a{
+  position:relative;text-decoration:none;
+  font-weight:600;font-size:clamp(.9375rem,1.25vw,1.375rem);
+  padding:.25rem 0;transition:color .3s ease;
+}
+.nav__links a:hover{color:#757575}
+.nav__links a::after{
+  content:"";position:absolute;left:0;right:0;bottom:-2px;height:2px;
+  background:currentColor;transform:scaleX(0);transform-origin:left;
+  transition:transform .25s ease;
+}
+.nav__links a[aria-current="true"]::after{transform:scaleX(1)}
+.nav__social{display:flex;align-items:center;gap:.5rem}
+.nav__social a{display:grid;place-items:center;width:32px;height:32px;border-radius:50%}
+.nav__social a:hover{background:rgba(255,255,255,.18)}
+.nav__social svg{width:30px;height:30px;fill:#fff}
+
+.burger{display:none;width:44px;height:44px;padding:0;background:none;border:0;cursor:pointer;color:#fff}
+.burger span{display:block;width:24px;height:2px;background:currentColor;margin:5px auto;transition:transform .25s ease,opacity .2s ease}
+.burger[aria-expanded="true"] span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.burger[aria-expanded="true"] span:nth-child(2){opacity:0}
+.burger[aria-expanded="true"] span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+
+@media (max-width:960px){
+  .burger{display:block}
+  .nav__menu{
+    position:fixed;inset:var(--nav-h) 0 auto;background:rgba(0,0,0,.98);
+    display:none;flex-direction:column;align-items:stretch;gap:0;
+    padding:.5rem 1.25rem 1.75rem;max-height:calc(100dvh - var(--nav-h));overflow-y:auto;
+  }
+  .nav__menu[data-open="true"]{display:flex}
+  .nav__group,.nav__links{flex-direction:column;align-items:stretch;gap:0;width:100%}
+  .nav__right{align-items:stretch}
+  .nav__links a{font-size:1.125rem;padding:.9rem 0;border-bottom:1px solid rgba(255,255,255,.12)}
+  .nav__social{padding-top:1.25rem;justify-content:center}
+}
+@media (min-width:961px){
+  .nav__menu{display:flex;align-items:center;justify-content:space-between;flex:1;gap:2rem}
+}
+
+
+/* ==========================================================================
+   ПОЛОСЫ
+   ========================================================================== */
+.band--first{padding-top:calc(var(--nav-h) + clamp(2rem,5vw,4.5rem))}
+.band--paper{background:var(--paper)}
+.band--stone{background:var(--stone-100)}
+.band--stone3{background:var(--stone-300)}
+.band--ink{background:var(--ink);color:#fff}
+.band--warm{background:linear-gradient(0turn,var(--stone-300) 0%,var(--stone-600) 100%)}
+.band--dim{background:var(--stone-600);color:#fff}
+.band--soft{background:var(--stone-200)}
+
+.split{display:grid;gap:var(--gap);align-items:center;grid-template-columns:repeat(2,minmax(0,1fr))}
+.split--flip .split__media{order:2}
+.split--stretch{align-items:stretch}
+.panel{background:var(--stone-300);border-radius:var(--r-md);padding:clamp(2rem,4vw,3.5rem)}
+.split__copy{display:grid;gap:1.25rem;align-content:center}
+@media (max-width:820px){
+  .split{grid-template-columns:1fr}
+  .split--flip .split__media{order:0}
+}
+
+/* ==========================================================================
+   ЗАГЛУШКИ ПОД ФОТО — светлые, чтобы страница не читалась чёрной
+   ========================================================================== */
+.ph{
+  position:relative;display:grid;place-items:center;
+  background:
+    repeating-linear-gradient(135deg,rgba(0,0,0,.05) 0 12px,transparent 12px 24px),
+    linear-gradient(145deg,#dedede,#b4b4b4);
+  border-radius:var(--r-lg);overflow:hidden;color:rgba(0,0,0,.5);
+  aspect-ratio:4/5;
+}
+.ph::after{
+  content:attr(data-label);
+  font-size:var(--fs-xs);font-weight:700;letter-spacing:.16em;text-transform:uppercase;
+  padding:.5rem .9rem;border:1.5px solid currentColor;border-radius:100px;
+  text-align:center;
+}
+.ph--md{border-radius:var(--r-md)}
+
+/* ==========================================================================
+   ФОТОГРАФИИ
+   ========================================================================== */
+.photo{width:100%;height:auto;display:block;border-radius:var(--r-lg);object-fit:cover}
+.photo--md{border-radius:var(--r-md)}
+.photo--fill{height:clamp(360px,44vw,540px)}   /* вертикаль рядом с текстом, иначе растёт до 800px */
+.photo--round{aspect-ratio:1;border-radius:50%;object-position:50% 28%}
+.photo--portrait{max-width:440px;margin-inline:auto}  /* вертикаль в широкой колонке */
+
+/* ==========================================================================
+   ПРАЙС
+   ========================================================================== */
+.price{display:grid;max-width:820px;margin-inline:auto}
+.price__item{padding-block:1.5rem;border-bottom:1px solid var(--line)}
+.price__group{
+  font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:.2em;
+  font-weight:700;opacity:.55;padding:2.25rem 0 .5rem;
+}
+.price__group:first-child{padding-top:0}
+.price__group + .price__item{border-top:1px solid var(--line)}
+.price__head{display:flex;align-items:baseline;justify-content:space-between;gap:1rem 1.5rem;flex-wrap:wrap}
+.price__name{font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:var(--fs-sm);flex:1 1 14rem}
+.price__sum{font-weight:700;font-size:1.25rem;white-space:nowrap;font-variant-numeric:tabular-nums}
+.price__note{font-size:var(--fs-sm);opacity:.75;padding-top:.4rem;max-width:60ch}
+
+/* ==========================================================================
+   ДО / ПОСЛЕ
+   ========================================================================== */
+.ba{
+  --pos:50%;
+  position:relative;width:min(100%,760px);margin-inline:auto;
+  aspect-ratio:1;border-radius:var(--r-sm);overflow:hidden;
+  touch-action:pan-y;user-select:none;cursor:ew-resize;background:#111;
+}
+.ba__layer{position:absolute;inset:0}
+.ba__layer .ph{height:100%;aspect-ratio:auto;border-radius:0}
+.ba__layer--after{clip-path:inset(0 0 0 var(--pos,50%))}
+.ba__tag{                              /* подписи в верхних углах */
+  position:absolute;top:0;z-index:3;
+  background:rgba(0,0,0,.72);color:#fff;
+  font-size:var(--fs-xs);padding:.35rem .7rem;pointer-events:none;
+}
+.ba__tag--l{left:0;border-radius:0 0 var(--r-sm) 0}
+.ba__tag--r{right:0;border-radius:0 0 0 var(--r-sm)}
+.ba__handle{
+  position:absolute;top:0;bottom:0;left:var(--pos,50%);z-index:4;
+  width:2px;background:#fff;translate:-50% 0;pointer-events:none;
+}
+.ba__knob{                             /* узкая белая пилюля */
+  position:absolute;top:50%;left:50%;translate:-50% -50%;
+  width:8px;height:64px;border-radius:100px;background:#fff;
+  box-shadow:0 2px 10px rgba(0,0,0,.45);
+}
+.ba__knob::before,.ba__knob::after{    /* стрелки по бокам */
+  content:"";position:absolute;top:50%;translate:0 -50%;
+  border-block:5px solid transparent;
+}
+.ba__knob::before{right:14px;border-right:7px solid #fff}
+.ba__knob::after{left:14px;border-left:7px solid #fff}
+
+/* ==========================================================================
+   ГАЛЕРЕЯ
+   ========================================================================== */
+.grid-works{
+  display:grid;gap:clamp(.75rem,1.4vw,1.25rem);
+  grid-template-columns:repeat(4,1fr);
+  grid-auto-rows:clamp(115px,14.5vw,205px);
+}
+.grid-works .tile--big{grid-column:span 2;grid-row:span 2}
+.grid-works .zoom,.grid-works .ph{height:100%;aspect-ratio:auto}
+.grid-works .photo,.grid-studio .photo{height:100%}
+@media (max-width:820px){
+  .grid-works{grid-template-columns:repeat(2,1fr);grid-auto-rows:clamp(130px,32vw,190px)}
+  .grid-works .tile--big{grid-column:span 2;grid-row:span 1}
+}
+
+.grid-studio{
+  display:grid;gap:clamp(.75rem,1.4vw,1.25rem);
+  grid-template-columns:repeat(2,1fr);
+  max-width:720px;margin-inline:auto;         /* иначе вертикали растут до 800 px */
+}
+.grid-studio .tile{aspect-ratio:3/4}          /* под вертикальные снимки */
+.grid-studio .ph{height:100%;aspect-ratio:auto}
+
+.zoom{
+  display:block;width:100%;padding:0;margin:0;
+  background:none;border:0;font:inherit;color:inherit;cursor:zoom-in;
+  border-radius:var(--r-lg);
+}
+
+.lightbox{
+  position:fixed;inset:0;z-index:150;border:0;padding:0;
+  width:100%;max-width:100%;height:100%;max-height:100%;
+  background:rgba(0,0,0,.94);place-items:center;
+}
+.lightbox::backdrop{background:rgba(0,0,0,.94)}
+.lightbox[open]{display:grid}
+.lightbox__inner{width:min(92vw,900px);max-height:86vh}
+.lightbox__inner .ph{aspect-ratio:4/3;max-height:86vh}
+.lightbox__close{
+  position:absolute;top:1.25rem;right:1.25rem;
+  width:48px;height:48px;border-radius:50%;
+  background:rgba(255,255,255,.16);color:#fff;border:0;cursor:pointer;
+  font-size:1.5rem;line-height:1;display:grid;place-items:center;
+}
+.lightbox__close:hover{background:rgba(255,255,255,.3)}
+
+/* ==========================================================================
+   ОТЗЫВЫ — аватар сверху, карточки по высоте контента
+   ========================================================================== */
+.reviews__source{padding-top:.75rem;opacity:.75}
+.reviews__source a{text-decoration:underline;text-underline-offset:4px}
+.reviews{
+  display:grid;gap:clamp(3.5rem,5vw,2.5rem);align-items:start;
+  grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+  max-width:880px;margin-inline:auto;
+}
+@media (max-width:900px){.reviews{grid-template-columns:1fr;max-width:520px;margin-inline:auto}}
+.review{display:flex;flex-direction:column;align-items:center}
+.review__ava{
+  width:104px;height:104px;border-radius:50%;overflow:hidden;
+  position:relative;z-index:2;margin-bottom:-52px;
+}
+.review__ava .ph{aspect-ratio:1;height:100%;border-radius:50%}
+.review__ava .ph::after{font-size:.5rem;padding:.2rem .45rem;letter-spacing:.08em}
+.review__card{
+  background:var(--stone-100);border-radius:var(--r-lg);
+  padding:4.25rem 1.75rem 2.25rem;text-align:center;
+  display:grid;gap:.75rem;width:100%;
+}
+.review__stars{color:#000;letter-spacing:.15em;font-size:.9375rem}
+.review__name{font-weight:700;font-size:1.125rem}
+.review__who{font-size:var(--fs-xs);opacity:.6;line-height:1.5}
+.review__text{font-size:var(--fs-sm);line-height:1.65}
+
+/* ==========================================================================
+   ГРАФИК
+   ========================================================================== */
+.days{display:flex;flex-wrap:wrap;gap:.5rem;max-width:460px}
+.days li{
+  min-width:54px;padding:.55rem .3rem;text-align:center;
+  border:1.5px solid rgba(255,255,255,.55);border-radius:12px;
+  font-size:var(--fs-sm);font-weight:700;letter-spacing:.04em;
+}
+.hours__big{
+  font-size:clamp(2.25rem,5.5vw,3.5rem);font-weight:700;line-height:1;
+  font-variant-numeric:tabular-nums;letter-spacing:-.02em;
+}
+
+/* ==========================================================================
+   КАРТА И КОНТАКТЫ
+   ========================================================================== */
+.map{border-radius:var(--r-md);overflow:hidden;background:var(--ink)}
+.map iframe{display:block;width:100%;height:clamp(300px,42vw,440px);border:0;filter:grayscale(1)}
+.map__stub{
+  height:clamp(300px,42vw,440px);display:grid;place-items:center;gap:.75rem;
+  text-align:center;color:rgba(255,255,255,.85);padding:2rem;
+  background:
+    repeating-linear-gradient(0deg,rgba(255,255,255,.06) 0 1px,transparent 1px 44px),
+    repeating-linear-gradient(90deg,rgba(255,255,255,.06) 0 1px,transparent 1px 44px),
+    var(--ink);
+}
+.map__links{display:flex;flex-wrap:wrap;gap:.6rem;justify-content:center;padding-top:1.25rem}
+.map__links a{
+  display:inline-flex;align-items:center;min-height:46px;padding:.55rem 1.35rem;
+  border:1px solid var(--ink);border-radius:100px;text-decoration:none;
+  font-size:var(--fs-sm);font-weight:600;transition:background-color .2s ease,color .2s ease;
+}
+.map__links a:hover{background:var(--ink);color:#fff}
+
+.contacts{display:grid;gap:1.25rem;justify-items:center;text-align:center}
+.contacts__logo{width:190px}
+.contacts__logo .ph{aspect-ratio:1;border-radius:50%}
+.contacts__name{font-size:clamp(1.375rem,3vw,1.75rem);font-weight:700}
+.contacts__list{display:grid;gap:.4rem;font-size:1.25rem}
+.contacts__list a{font-weight:700;text-decoration:underline;text-underline-offset:4px}
+.contacts__note{font-size:1rem;opacity:.75}
+.social{display:flex;gap:.85rem;justify-content:center;padding-top:.25rem}
+.social a{display:grid;place-items:center;width:48px;height:48px;transition:transform .2s ease,opacity .2s ease}
+.social a:hover{transform:translateY(-3px);opacity:.75}
+.social svg{width:48px;height:48px;fill:var(--ink)}
+
+.footer{background:var(--ink);color:rgba(255,255,255,.6);padding-block:2rem;font-size:var(--fs-xs)}
+.footer__inner{display:flex;flex-wrap:wrap;gap:1rem;justify-content:space-between;align-items:center}
+.footer a{text-decoration:underline;text-underline-offset:3px}
+
+/* Строчные ссылки на телефон и отзывы были ниже 24 px — по пальцу
+   попасть тяжело. Добавляем высоту, не трогая внешний вид. */
+.contacts__list a,.footer a,.reviews__source a{
+  display:inline-block;padding-block:.25rem;min-height:24px;
+}
+
+/* ==========================================================================
+   АНИМАЦИИ ПОЯВЛЕНИЯ  (повторяют набор оригинала)
+   ========================================================================== */
+/* Прячем только при работающем скрипте: если он не выполнится,
+   страница останется полностью читаемой, а не пустой. */
+.js [data-anim]{opacity:0;transition:opacity .8s ease,transform .8s ease}
+.js [data-anim="zoomin"]     {transform:scale(.9)}
+.js [data-anim="fadeinright"]{transform:translateX(60px)}
+.js [data-anim="fadeinleft"] {transform:translateX(-60px)}
+.js [data-anim="fadeindown"] {transform:translateY(-40px)}
+.js [data-anim="fadeinup"]   {transform:translateY(40px)}
+.js [data-anim].is-in{opacity:1;transform:none}
+
+/* На телефоне разбег меньше: там до края экрана ближе и длинный сдвиг
+   читается как рывок. */
+@media (max-width:640px){
+  .js [data-anim="fadeinright"]{transform:translateX(28px)}
+  .js [data-anim="fadeinleft"] {transform:translateX(-28px)}
+  .js [data-anim="fadeindown"] {transform:translateY(-22px)}
+  .js [data-anim="fadeinup"]   {transform:translateY(22px)}
+  .js [data-anim="zoomin"]     {transform:scale(.94)}
+}
+
+@media (prefers-reduced-motion:reduce){
+  /* Убираем движение, но оставляем мягкое проявление: оно не вызывает
+     дискомфорта и страница не выглядит мёртвой. */
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important}
+  .js [data-anim]{transform:none!important;transition:opacity .45s ease}
+  .btn::after{display:none}   /* бесконечный бегущий блик — как раз то, что мешает */
+  html{scroll-behavior:auto}
+}
+</style>
+</head>
+<body>
+<script>document.documentElement.classList.add("js")</script>
+
+<a class="skip" href="#main">Перейти к содержимому</a>
+
+<!-- ================= НАВИГАЦИЯ ================= -->
+<nav class="nav" aria-label="Основное меню">
+  <div class="nav__inner">
+    <a class="nav__brand" href="#about">Мансур-Барбер</a>
+
+    <button class="burger" type="button" aria-expanded="false" aria-controls="menu" aria-label="Открыть меню">
+      <span></span><span></span><span></span>
+    </button>
+
+    <div class="nav__menu" id="menu">
+      <div class="nav__group">
+        <ul class="nav__links">
+          <li><a href="#price">Прайс</a></li>
+          <li><a href="#reviews">Отзывы</a></li>
+          <li><a href="#works">Фото работ</a></li>
+          <li><a href="#atmosphere">Атмосфера</a></li>
+        </ul>
+      </div>
+
+      <div class="nav__group nav__right">
+        <ul class="nav__links">
+          <li><a href="#schedule">График работы</a></li>
+          <li><a href="https://taplink.cc/manszbarber" target="_blank" rel="noopener">Запись</a></li>
+          <li><a href="#contacts">Контакты</a></li>
+        </ul>
+        <ul class="nav__social">
+          <li><a href="https://t.me/+79221575487" target="_blank" rel="noopener nofollow" aria-label="Telegram">
+            <svg viewBox="0 0 100 100" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M50 100c27.614 0 50-22.386 50-50S77.614 0 50 0 0 22.386 0 50s22.386 50 50 50Zm21.977-68.056c.386-4.38-4.24-2.576-4.24-2.576-3.415 1.414-6.937 2.85-10.497 4.302-11.04 4.503-22.444 9.155-32.159 13.734-5.268 1.932-2.184 3.864-2.184 3.864l8.351 2.577c3.855 1.16 5.91-.129 5.91-.129l17.988-12.238c6.424-4.38 4.882-.773 3.34.773l-13.49 12.882c-2.056 1.804-1.028 3.35-.129 4.123 2.55 2.249 8.82 6.364 11.557 8.16.712.467 1.185.778 1.292.858.642.515 4.111 2.834 6.424 2.319 2.313-.516 2.57-3.479 2.57-3.479l3.083-20.226c.462-3.511.993-6.886 1.417-9.582.4-2.546.705-4.485.767-5.362Z"/></svg>
+          </a></li>
+          <li><a href="https://wa.me/79221575487" target="_blank" rel="noopener nofollow" aria-label="WhatsApp"><svg viewBox="0 0 100 100" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M50 100C77.6142 100 100 77.6142 100 50C100 22.3858 77.6142 0 50 0C22.3858 0 0 22.3858 0 50C0 77.6142 22.3858 100 50 100ZM69.7626 28.9928C64.6172 23.841 57.7739 21.0027 50.4832 21C35.4616 21 23.2346 33.2252 23.2292 48.2522C23.2274 53.0557 24.4823 57.7446 26.8668 61.8769L23 76L37.4477 72.2105C41.4282 74.3822 45.9107 75.5262 50.4714 75.528H50.4823C65.5029 75.528 77.7299 63.301 77.7363 48.2749C77.7408 40.9915 74.9089 34.1446 69.7626 28.9928ZM62.9086 53.9588C62.2274 53.6178 58.8799 51.9708 58.2551 51.7435C57.6313 51.5161 57.1766 51.4024 56.7228 52.0845C56.269 52.7666 54.964 54.2998 54.5666 54.7545C54.1692 55.2092 53.7718 55.2656 53.0915 54.9246C52.9802 54.8688 52.8283 54.803 52.6409 54.7217C51.6819 54.3057 49.7905 53.4855 47.6151 51.5443C45.5907 49.7382 44.2239 47.5084 43.8265 46.8272C43.4291 46.1452 43.7837 45.7769 44.1248 45.4376C44.3292 45.2338 44.564 44.9478 44.7987 44.662C44.9157 44.5194 45.0328 44.3768 45.146 44.2445C45.4345 43.9075 45.56 43.6516 45.7302 43.3049C45.7607 43.2427 45.7926 43.1776 45.8272 43.1087C46.0545 42.654 45.9409 42.2565 45.7708 41.9155C45.6572 41.6877 45.0118 40.1167 44.4265 38.6923C44.1355 37.984 43.8594 37.3119 43.671 36.8592C43.1828 35.687 42.6883 35.69 42.2913 35.6924C42.2386 35.6928 42.1876 35.6931 42.1386 35.6906C41.7421 35.6706 41.2874 35.667 40.8336 35.667C40.3798 35.667 39.6423 35.837 39.0175 36.5191C38.9773 36.5631 38.9323 36.6111 38.8834 36.6633C38.1738 37.4209 36.634 39.0648 36.634 42.2002C36.634 45.544 39.062 48.7748 39.4124 49.2411L39.415 49.2444C39.4371 49.274 39.4767 49.3309 39.5333 49.4121C40.3462 50.5782 44.6615 56.7691 51.0481 59.5271C52.6732 60.2291 53.9409 60.6475 54.9303 60.9612C56.5618 61.4796 58.046 61.4068 59.22 61.2313C60.5286 61.0358 63.2487 59.5844 63.8161 57.9938C64.3836 56.4033 64.3836 55.0392 64.2136 54.7554C64.0764 54.5258 63.7545 54.3701 63.2776 54.1395C63.1633 54.0843 63.0401 54.0247 62.9086 53.9588Z"/></svg></a></li>
+          <li><a href="tel:+79221575487" aria-label="Позвонить">
+            <svg viewBox="0 0 100 100" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M50 100c27.614 0 50-22.386 50-50S77.614 0 50 0 0 22.386 0 50s22.386 50 50 50ZM32.367 30.362c1.529-1.527 2.313-2.174 2.786-2.302.562-.151 1.052-.02 1.564.418.433.372 1.527 1.492 2.276 2.33 2.2 2.463 4.882 5.826 5.257 6.593.114.232.125.298.106.63-.036.61-.16.802-.977 1.502-1.302 1.116-3.299 3.204-3.997 4.18-.457.639-.47 1.039-.058 1.768.35.62 2.053 2.862 3.254 4.284 2.009 2.38 4.337 4.603 6.599 6.3 1.68 1.262 4.044 2.716 5.626 3.461 1.13.533 1.484.503 2.208-.187.695-.662 1.513-1.73 2.883-3.764.446-.663.879-1.263.962-1.333.253-.214.54-.315.957-.338.267-.014.447.001.592.05.278.095 1.005.55 3.954 2.473 1.369.892 2.886 1.875 3.371 2.185 2.751 1.752 3.056 1.988 3.198 2.465.19.638.032 1.048-.866 2.246-1.114 1.487-2.99 3.496-4.389 4.701-1.135.978-2.594 1.962-4.033 2.718l-.622.327-.63-.001c-1.836-.001-3.567-.367-6.217-1.314-6.205-2.219-11.707-5.466-16.525-9.753-.904-.804-3.004-2.921-3.787-3.816-2.607-2.982-4.57-5.891-6.266-9.284-1.222-2.444-2.345-5.282-2.534-6.402-.278-1.643.398-3.791 1.914-6.089.908-1.375 1.902-2.562 3.392-4.05Z"/></svg>
+          </a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<main id="main">
+<!-- ================= О МАСТЕРЕ ================= -->
+<section class="band band--paper band--first" id="about">
+  <div class="shell split split--flip">
+    <div class="split__media" data-anim="fadeinleft">
+      <!-- Первый экран: грузим сразу и в приоритете, ленивая загрузка тут вредит -->
+      <img class="photo" src="img/master.jpg" width="590" height="808"
+           alt="Мансур — барбер, Екатеринбург" fetchpriority="high" decoding="async">
+    </div>
+    <div class="split__copy center" data-anim="fadeinright" data-anim-chain>
+      <h1 class="display">Приветствую, я Мансур —<br>барбер из Екатеринбурга</h1>
+      <p>Стригу мужские, студенческие и детские стрижки. Оформляю бороду и усы, делаю экспресс-бритьё лица и головы.</p>
+      <p>Индивидуальный подход к каждому: подберём стрижку под ваш стиль и образ, а не под то, что модно в этом сезоне.</p>
+      <p><em>Почувствуй на себе качество и отличный сервис.</em></p>
+      <p><strong>До встречи в кресле!</strong></p>
+      <p><a class="btn" href="https://taplink.cc/manszbarber" target="_blank" rel="noopener"><span>Записаться</span></a></p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ОФФЕР ================= -->
+<section class="band band--stone">
+  <div class="shell center">
+    <h2 class="display" data-anim="zoomin">Мужские стрижки<br>/<br>Под ваш стиль и образ</h2>
+  </div>
+</section>
+
+<!-- ================= ЗАЧЕМ ================= -->
+<section class="band band--paper">
+  <div class="shell split">
+    <div class="split__copy" data-anim="fadeinright" data-anim-chain>
+      <h2 class="h2">Каждый современный мужчина хочет чувствовать себя увереннее.</h2>
+      <p class="lead measure">Самый быстрый и действенный способ получить <strong>+100000 к уверенности</strong> — свежая качественная стрижка.</p>
+    </div>
+    <div class="split__media" data-anim="fadeinleft">
+      <img class="photo photo--portrait" src="img/process.webp" width="960" height="1280"
+           alt="Мужчина со свежей стрижкой у входа в салон OXYGEN" loading="lazy" decoding="async">
+    </div>
+  </div>
+</section>
+
+<!-- ================= ПРАЙС ================= -->
+<section class="band band--stone3" id="price">
+  <div class="shell">
+    <div class="center section-head">
+      <h2 class="h2" data-anim="fadeindown">Прайс услуг</h2>
+    </div>
+
+    <div class="price" data-anim-chain>
+      <p class="price__group" data-anim="fadeindown">Стрижки</p>
+      <div class="price__item" data-anim="fadeindown">
+        <div class="price__head"><span class="price__name">Стрижка мужская</span><span class="price__sum">1900&nbsp;₽</span></div>
+      </div>
+      <div class="price__item" data-anim="fadeindown">
+        <div class="price__head"><span class="price__name">Стрижка студент</span><span class="price__sum">1700&nbsp;₽</span></div>
+      </div>
+      <div class="price__item" data-anim="fadeindown">
+        <div class="price__head"><span class="price__name">Стрижка — удлинённый дизайн</span><span class="price__sum">2200&nbsp;₽</span></div>
+        <p class="price__note">Выполняется ножницами</p>
+      </div>
+      <div class="price__item" data-anim="fadeindown">
+        <div class="price__head"><span class="price__name">«Акция» Первая стрижка</span><span class="price__sum">1500&nbsp;₽</span></div>
+      </div>
+      <div class="price__item" data-anim="fadeindown">
+        <div class="price__head"><span class="price__name">Стрижка детская от 0 до 5 лет</span><span class="price__sum">1300&nbsp;₽</span></div>
+      </div>
+      <div class="price__item" data-anim="fadeindown">
+        <div class="price__head"><span class="price__name">Стрижка детская от 5 до 16 лет</span><span class="price__sum">1500&nbsp;₽</span></div>
+      </div>
+      <div class="price__item" data-anim="fadeindown">
+        <div class="price__head"><span class="price__name">Стрижка «Отец и сын»</span><span class="price__sum">2700&nbsp;₽</span></div>
+      </div>
+      <p class="price__group" data-anim="fadeindown">Борода и бритьё</p>
+      <div class="price__item" data-anim="fadeindown">
+        <div class="price__head"><span class="price__name">Оформление бороды и усов</span><span class="price__sum">1300&nbsp;₽</span></div>
+      </div>
+      <div class="price__item" data-anim="fadeindown">
+        <div class="price__head"><span class="price__name">Экспресс-бритьё головы</span><span class="price__sum">700&nbsp;₽</span></div>
+      </div>
+      <div class="price__item" data-anim="fadeindown">
+        <div class="price__head"><span class="price__name">Экспресс-бритьё лица</span><span class="price__sum">600&nbsp;₽</span></div>
+      </div>
+      <p class="price__group" data-anim="fadeindown">Комплексы</p>
+      <div class="price__item" data-anim="fadeindown">
+        <div class="price__head"><span class="price__name">Комплекс — стрижка и оформление бороды</span><span class="price__sum">2500&nbsp;₽</span></div>
+      </div>
+      <div class="price__item" data-anim="fadeindown">
+        <div class="price__head"><span class="price__name">Комплекс студента — стрижка и оформление бороды</span><span class="price__sum">2300&nbsp;₽</span></div>
+      </div>
+    </div>
+
+    <div class="btn-row"><a class="btn" href="https://taplink.cc/manszbarber" target="_blank" rel="noopener"><span>Записаться</span></a></div>
+  </div>
+</section>
+
+<!-- ================= ДО / ПОСЛЕ ================= -->
+<section class="band band--ink">
+  <div class="shell">
+    <div class="stack">
+    <div class="ba" tabindex="0" role="slider"
+         aria-label="Сравнение до и после, первый пример"
+         aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
+      <div class="ba__layer"><div class="ph" data-label="До" role="img" aria-label="До стрижки"></div></div>
+      <div class="ba__layer ba__layer--after"><div class="ph" data-label="После" role="img" aria-label="После стрижки"></div></div>
+      <span class="ba__tag ba__tag--l">До</span>
+      <span class="ba__tag ba__tag--r">После</span>
+      <div class="ba__handle"><span class="ba__knob"></span></div>
+    </div>
+
+    <div class="ba" tabindex="0" role="slider"
+         aria-label="Сравнение до и после, второй пример"
+         aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
+      <div class="ba__layer"><div class="ph" data-label="До" role="img" aria-label="До оформления бороды"></div></div>
+      <div class="ba__layer ba__layer--after"><div class="ph" data-label="После" role="img" aria-label="После оформления бороды"></div></div>
+      <span class="ba__tag ba__tag--l">До</span>
+      <span class="ba__tag ba__tag--r">После</span>
+      <div class="ba__handle"><span class="ba__knob"></span></div>
+    </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ФОТО РАБОТ ================= -->
+<section class="band band--stone" id="works">
+  <div class="shell">
+    <div class="grid-works" data-anim-chain>
+      <div class="tile tile--big" data-anim="zoomin"><button class="zoom" type="button" aria-label="Открыть работу 1"><div class="ph" data-label="Работа 1"></div></button></div>
+      <div class="tile" data-anim="zoomin"><button class="zoom" type="button" aria-label="Открыть пример стрижки 1"><img class="photo" src="img/work-01.jpg" width="288" height="150" alt="Пример мужской стрижки" loading="lazy" decoding="async"></button></div>
+      <div class="tile" data-anim="zoomin"><button class="zoom" type="button" aria-label="Открыть пример стрижки 2"><img class="photo" src="img/work-02.jpg" width="267" height="150" alt="Пример мужской стрижки" loading="lazy" decoding="async"></button></div>
+      <div class="tile" data-anim="zoomin"><button class="zoom" type="button" aria-label="Открыть пример стрижки 3"><img class="photo" src="img/work-03.jpg" width="267" height="150" alt="Пример мужской стрижки" loading="lazy" decoding="async"></button></div>
+      <div class="tile" data-anim="zoomin"><button class="zoom" type="button" aria-label="Открыть пример стрижки 4"><img class="photo" src="img/work-04.jpg" width="267" height="150" alt="Пример мужской стрижки" loading="lazy" decoding="async"></button></div>
+      <div class="tile" data-anim="zoomin"><button class="zoom" type="button" aria-label="Открыть пример стрижки 5"><img class="photo" src="img/work-05.jpg" width="288" height="150" alt="Пример мужской стрижки" loading="lazy" decoding="async"></button></div>
+      <div class="tile" data-anim="zoomin"><button class="zoom" type="button" aria-label="Открыть пример стрижки 6"><img class="photo" src="img/work-06.jpg" width="267" height="150" alt="Пример мужской стрижки" loading="lazy" decoding="async"></button></div>
+      <div class="tile tile--big" data-anim="zoomin"><button class="zoom" type="button" aria-label="Открыть работу 8"><div class="ph" data-label="Работа 8"></div></button></div>
+      <div class="tile" data-anim="zoomin"><button class="zoom" type="button" aria-label="Открыть пример стрижки 7"><img class="photo" src="img/work-07.jpg" width="300" height="150" alt="Пример мужской стрижки" loading="lazy" decoding="async"></button></div>
+      <div class="tile" data-anim="zoomin"><button class="zoom" type="button" aria-label="Открыть работу 10"><div class="ph" data-label="Работа 10"></div></button></div>
+    </div>
+
+    <div class="btn-row"><a class="btn" href="https://taplink.cc/manszbarber" target="_blank" rel="noopener"><span>Записаться</span></a></div>
+  </div>
+</section>
+
+<!-- ================= ОТЗЫВЫ ================= -->
+<section class="band band--paper" id="reviews">
+  <div class="shell">
+    <div class="center section-head--wide">
+      <h2 class="h2" data-anim="fadeindown">Отзывы клиентов</h2>
+      <p class="lead reviews__source" data-anim="fadeindown"><a href="https://yandex.ru/maps/?text=Мансур-Барбер%20Екатеринбург%20Радищева%2033" target="_blank" rel="noopener nofollow">50 отзывов на Яндекс.Картах</a></p>
+    </div>
+
+    <div class="reviews" data-anim-chain>
+      <article class="review" data-anim="fadeinup">
+        <div class="review__ava"><div class="ph" data-label="Фото"></div></div>
+        <div class="review__card">
+          <p class="review__stars" aria-label="Оценка 5 из 5">★★★★★</p>
+          <p class="review__name">Сергей С.</p>
+          <p class="review__who">Знаток города 3 уровня · 15 апреля</p>
+          <p class="review__text">Рекомендую Мансура как опытного, профессионального барбера в Екатеринбурге, знаком с ним уже более 6 лет, последние несколько лет подстригаюсь только у него. Всегда индивидуальный подход к каждому клиенту, стремление к новому и максимальная клиентоориентированность!</p>
+        </div>
+      </article>
+
+      <article class="review" data-anim="fadeinup">
+        <div class="review__ava"><div class="ph" data-label="Фото"></div></div>
+        <div class="review__card">
+          <p class="review__stars" aria-label="Оценка 5 из 5">★★★★★</p>
+          <p class="review__name">Данил Зерницын</p>
+          <p class="review__who">Знаток города 5 уровня · 7 февраля</p>
+          <p class="review__text">Мансур профессионал своего дела, стригусь у него на протяжении 3&nbsp;лет. Перепробовали множество стрижек, от коротких до длинных, любую длину Мансур стрижет просто отлично! Оформление бороды всегда на высоте! Всё объяснит и проконсультирует с укладкой. Тот самый мастер, который услышит ваши пожелания и воплотит их в реальность!</p>
+        </div>
+      </article>
+
+      <article class="review" data-anim="fadeinup">
+        <div class="review__ava"><div class="ph" data-label="Фото"></div></div>
+        <div class="review__card">
+          <p class="review__stars" aria-label="Оценка 5 из 5">★★★★★</p>
+          <p class="review__name">Сергей Косолапов</p>
+          <p class="review__who">Знаток города 3 уровня · 21 февраля</p>
+          <p class="review__text">Знакомство с Мансуром более года назад стало для меня настоящим открытием. Ещё с первой стрижки сказал, как будет лучше для формы моей головы и лица, предложил варианты, а после стрижки дал советы по уходу. С того момента стригусь только у Мансура — он настоящий мастер своего дела! Очень рекомендую, точно не пожалеете.</p>
+        </div>
+      </article>
+
+      <article class="review" data-anim="fadeinup">
+        <div class="review__ava"><div class="ph" data-label="Фото"></div></div>
+        <div class="review__card">
+          <p class="review__stars" aria-label="Оценка 5 из 5">★★★★★</p>
+          <p class="review__name">Елена З.</p>
+          <p class="review__who">Знаток города 3 уровня · 12 февраля</p>
+          <p class="review__text">Мансур воспитанный и тактичный мастер, в процессе уточнил детали, предложил пару вариантов, но желаемое видит сходу. Сделать стрижку преимуществом — это редкое умение барбера. Стрижка получилась аккуратная, переходы ровные с чёткими окантовками. Сделал лучше, чем можно представить!</p>
+        </div>
+      </article>
+    </div>
+
+    <div class="btn-row"><a class="btn" href="https://taplink.cc/manszbarber" target="_blank" rel="noopener"><span>Записаться</span></a></div>
+  </div>
+</section>
+
+<!-- ================= АТМОСФЕРА ================= -->
+<section class="band band--warm" id="atmosphere">
+  <div class="shell stack stack--tight">
+    <div class="split split--stretch">
+      <div class="split__media" data-anim="fadeinleft">
+        <img class="photo photo--md photo--fill" src="img/studio-1.webp" width="960" height="1280"
+             alt="Вход в салон OXYGEN на улице Радищева, 33" loading="lazy" decoding="async">
+      </div>
+      <div class="split__copy panel" data-anim="fadeinright">
+        <h2 class="h2">Салон OXYGEN на Радищева, 33</h2>
+        <div class="rule"></div>
+        <p class="lead">Принимаю в салоне красоты OXYGEN. Ищите вывеску O₂ — вход с улицы.</p>
+      </div>
+    </div>
+
+    <div class="grid-studio" data-anim-chain>
+      <div class="tile" data-anim="zoomin"><img class="photo photo--md" src="img/studio-3.webp" width="960" height="1280" alt="Вывеска салона красоты OXYGEN" loading="lazy" decoding="async"></div>
+      <div class="tile" data-anim="zoomin"><div class="ph ph--md" data-label="Интерьер салона"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ГРАФИК ================= -->
+<section class="band band--dim" id="schedule">
+  <div class="shell split">
+    <div class="split__copy" data-anim="fadeinright" data-anim-chain>
+      <h2 class="h2">График работы</h2>
+
+      <ul class="days" aria-label="Дни работы">
+        <li>Пн</li><li>Вт</li><li>Ср</li><li>Чт</li><li>Пт</li><li>Сб</li><li>Вс</li>
+      </ul>
+
+      <p class="hours__big"><time datetime="10:00">10:00</time>&thinsp;—&thinsp;<time datetime="21:00">21:00</time></p>
+      <p class="lead">Ежедневно, без выходных.</p>
+
+      <p class="measure">Записывайтесь онлайн или пишите в WhatsApp, Telegram и MAX — подберём удобное время.</p>
+      <p><a class="btn btn--ondark" href="https://taplink.cc/manszbarber" target="_blank" rel="noopener"><span>Записаться</span></a></p>
+    </div>
+    <div class="split__media" data-anim="fadeinleft">
+      <img class="photo photo--md" src="img/studio-2.webp" width="960" height="1280"
+           alt="Рабочее место барбера: кресло и зеркало в салоне OXYGEN" loading="lazy" decoding="async">
+    </div>
+  </div>
+</section>
+
+<!-- ================= КАРТА ================= -->
+<section class="band band--warm" id="map">
+  <div class="shell">
+    <div class="center section-head">
+      <h2 class="h2" data-anim="fadeindown">Екатеринбург, ул. Радищева, 33</h2>
+    </div>
+
+    <div class="map" data-anim="zoomin">
+      <!-- Карта собрана из ссылки https://yandex.ru/maps/-/CTvO4I5C
+           Короткий код после /-/ подставляется в адрес виджета как есть.
+           Если понадобится другая карта: Яндекс.Карты → «Поделиться» → «Код карты». -->
+      <iframe src="https://yandex.ru/map-widget/v1/-/CTvO4I5C"
+              title="Карта проезда: Екатеринбург, ул. Радищева, 33"
+              loading="lazy" allowfullscreen></iframe>
+    </div>
+
+    <div class="map__links">
+      <a href="https://yandex.ru/maps/?text=Екатеринбург%20Радищева%2033" target="_blank" rel="noopener nofollow">Открыть в Яндекс.Картах</a>
+      <a href="https://2gis.ru/search/Екатеринбург%20Радищева%2033" target="_blank" rel="noopener nofollow">Открыть в 2ГИС</a>
+      <a href="https://maps.google.com/?q=Екатеринбург%20Радищева%2033" target="_blank" rel="noopener nofollow">Открыть в Google Maps</a>
+    </div>
+  </div>
+</section>
+
+<!-- ================= КОНТАКТЫ ================= -->
+<section class="band band--soft" id="contacts">
+  <div class="shell">
+    <div class="contacts" data-anim="zoomin" data-anim-chain>
+      <div class="contacts__logo">
+        <img class="photo photo--round" src="img/master.jpg" width="590" height="808"
+             alt="Мансур — барбер, Екатеринбург" loading="lazy" decoding="async">
+      </div>
+      <p class="contacts__name">Мансур-Барбер</p>
+
+      <div class="contacts__list">
+        <p><strong>Адрес:</strong> Екатеринбург, ул. Радищева, 33</p>
+        <p><strong>Телефон:</strong> <a href="tel:+79221575487">+7 (922) 157-54-87</a></p>
+        <p class="contacts__note">WhatsApp · Telegram · MAX</p>
+      </div>
+
+      <ul class="social">
+        <li><a href="https://t.me/+79221575487" target="_blank" rel="noopener nofollow" aria-label="Написать в Telegram">
+          <svg viewBox="0 0 100 100" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M50 100c27.614 0 50-22.386 50-50S77.614 0 50 0 0 22.386 0 50s22.386 50 50 50Zm21.977-68.056c.386-4.38-4.24-2.576-4.24-2.576-3.415 1.414-6.937 2.85-10.497 4.302-11.04 4.503-22.444 9.155-32.159 13.734-5.268 1.932-2.184 3.864-2.184 3.864l8.351 2.577c3.855 1.16 5.91-.129 5.91-.129l17.988-12.238c6.424-4.38 4.882-.773 3.34.773l-13.49 12.882c-2.056 1.804-1.028 3.35-.129 4.123 2.55 2.249 8.82 6.364 11.557 8.16.712.467 1.185.778 1.292.858.642.515 4.111 2.834 6.424 2.319 2.313-.516 2.57-3.479 2.57-3.479l3.083-20.226c.462-3.511.993-6.886 1.417-9.582.4-2.546.705-4.485.767-5.362Z"/></svg>
+        </a></li>
+        <li><a href="https://wa.me/79221575487" target="_blank" rel="noopener nofollow" aria-label="Написать в WhatsApp"><svg viewBox="0 0 100 100" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M50 100C77.6142 100 100 77.6142 100 50C100 22.3858 77.6142 0 50 0C22.3858 0 0 22.3858 0 50C0 77.6142 22.3858 100 50 100ZM69.7626 28.9928C64.6172 23.841 57.7739 21.0027 50.4832 21C35.4616 21 23.2346 33.2252 23.2292 48.2522C23.2274 53.0557 24.4823 57.7446 26.8668 61.8769L23 76L37.4477 72.2105C41.4282 74.3822 45.9107 75.5262 50.4714 75.528H50.4823C65.5029 75.528 77.7299 63.301 77.7363 48.2749C77.7408 40.9915 74.9089 34.1446 69.7626 28.9928ZM62.9086 53.9588C62.2274 53.6178 58.8799 51.9708 58.2551 51.7435C57.6313 51.5161 57.1766 51.4024 56.7228 52.0845C56.269 52.7666 54.964 54.2998 54.5666 54.7545C54.1692 55.2092 53.7718 55.2656 53.0915 54.9246C52.9802 54.8688 52.8283 54.803 52.6409 54.7217C51.6819 54.3057 49.7905 53.4855 47.6151 51.5443C45.5907 49.7382 44.2239 47.5084 43.8265 46.8272C43.4291 46.1452 43.7837 45.7769 44.1248 45.4376C44.3292 45.2338 44.564 44.9478 44.7987 44.662C44.9157 44.5194 45.0328 44.3768 45.146 44.2445C45.4345 43.9075 45.56 43.6516 45.7302 43.3049C45.7607 43.2427 45.7926 43.1776 45.8272 43.1087C46.0545 42.654 45.9409 42.2565 45.7708 41.9155C45.6572 41.6877 45.0118 40.1167 44.4265 38.6923C44.1355 37.984 43.8594 37.3119 43.671 36.8592C43.1828 35.687 42.6883 35.69 42.2913 35.6924C42.2386 35.6928 42.1876 35.6931 42.1386 35.6906C41.7421 35.6706 41.2874 35.667 40.8336 35.667C40.3798 35.667 39.6423 35.837 39.0175 36.5191C38.9773 36.5631 38.9323 36.6111 38.8834 36.6633C38.1738 37.4209 36.634 39.0648 36.634 42.2002C36.634 45.544 39.062 48.7748 39.4124 49.2411L39.415 49.2444C39.4371 49.274 39.4767 49.3309 39.5333 49.4121C40.3462 50.5782 44.6615 56.7691 51.0481 59.5271C52.6732 60.2291 53.9409 60.6475 54.9303 60.9612C56.5618 61.4796 58.046 61.4068 59.22 61.2313C60.5286 61.0358 63.2487 59.5844 63.8161 57.9938C64.3836 56.4033 64.3836 55.0392 64.2136 54.7554C64.0764 54.5258 63.7545 54.3701 63.2776 54.1395C63.1633 54.0843 63.0401 54.0247 62.9086 53.9588Z"/></svg></a></li>
+          <li><a href="tel:+79221575487" aria-label="Позвонить">
+          <svg viewBox="0 0 100 100" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M50 100c27.614 0 50-22.386 50-50S77.614 0 50 0 0 22.386 0 50s22.386 50 50 50ZM32.367 30.362c1.529-1.527 2.313-2.174 2.786-2.302.562-.151 1.052-.02 1.564.418.433.372 1.527 1.492 2.276 2.33 2.2 2.463 4.882 5.826 5.257 6.593.114.232.125.298.106.63-.036.61-.16.802-.977 1.502-1.302 1.116-3.299 3.204-3.997 4.18-.457.639-.47 1.039-.058 1.768.35.62 2.053 2.862 3.254 4.284 2.009 2.38 4.337 4.603 6.599 6.3 1.68 1.262 4.044 2.716 5.626 3.461 1.13.533 1.484.503 2.208-.187.695-.662 1.513-1.73 2.883-3.764.446-.663.879-1.263.962-1.333.253-.214.54-.315.957-.338.267-.014.447.001.592.05.278.095 1.005.55 3.954 2.473 1.369.892 2.886 1.875 3.371 2.185 2.751 1.752 3.056 1.988 3.198 2.465.19.638.032 1.048-.866 2.246-1.114 1.487-2.99 3.496-4.389 4.701-1.135.978-2.594 1.962-4.033 2.718l-.622.327-.63-.001c-1.836-.001-3.567-.367-6.217-1.314-6.205-2.219-11.707-5.466-16.525-9.753-.904-.804-3.004-2.921-3.787-3.816-2.607-2.982-4.57-5.891-6.266-9.284-1.222-2.444-2.345-5.282-2.534-6.402-.278-1.643.398-3.791 1.914-6.089.908-1.375 1.902-2.562 3.392-4.05Z"/></svg>
+        </a></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="footer">
+  <div class="shell footer__inner">
+    <span>© <span id="year">2026</span> Мансур-Барбер · Екатеринбург</span>
+    <span><a href="tel:+79221575487">+7 (922) 157-54-87</a></span>
+  </div>
+</footer>
+
+<dialog class="lightbox" id="lightbox" aria-label="Просмотр фотографии">
+  <button class="lightbox__close" type="button" aria-label="Закрыть">&times;</button>
+  <div class="lightbox__inner"></div>
+</dialog>
+
+<!-- Разметка для поиска — заполнить теми же данными, что и на странице -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "HairSalon",
+  "name": "Мансур-Барбер",
+  "description": "Мужские, студенческие и детские стрижки, оформление бороды и усов, экспресс-бритьё. Индивидуальный подход, под ваш стиль и образ.",
+  "url": "https://example.ru/",
+  "image": "https://example.ru/img/og.jpg",
+  "telephone": "+79221575487",
+  "priceRange": "600–2700 ₽",
+  "currenciesAccepted": "RUB",
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "Екатеринбург",
+    "streetAddress": "улица Радищева, 33, салон красоты OXYGEN",
+    "addressCountry": "RU"
+  },
+  "hasMap": "https://yandex.ru/maps/-/CTvO4I5C",
+  "sameAs": [
+    "https://taplink.cc/manszbarber",
+    "https://t.me/+79221575487",
+    "https://wa.me/79221575487"
+  ],
+  "openingHoursSpecification": [
+    {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday"
+      ],
+      "opens": "10:00",
+      "closes": "21:00"
+    }
+  ],
+  "makesOffer": [
+    {
+      "@type": "Offer",
+      "itemOffered": {
+        "@type": "Service",
+        "name": "Стрижка мужская"
+      },
+      "price": "1900",
+      "priceCurrency": "RUB"
+    },
+    {
+      "@type": "Offer",
+      "itemOffered": {
+        "@type": "Service",
+        "name": "Стрижка студент"
+      },
+      "price": "1700",
+      "priceCurrency": "RUB"
+    },
+    {
+      "@type": "Offer",
+      "itemOffered": {
+        "@type": "Service",
+        "name": "Стрижка — удлинённый дизайн (ножницами)"
+      },
+      "price": "2200",
+      "priceCurrency": "RUB"
+    },
+    {
+      "@type": "Offer",
+      "itemOffered": {
+        "@type": "Service",
+        "name": "«Акция» Первая стрижка"
+      },
+      "price": "1500",
+      "priceCurrency": "RUB"
+    },
+    {
+      "@type": "Offer",
+      "itemOffered": {
+        "@type": "Service",
+        "name": "Стрижка детская от 0 до 5 лет"
+      },
+      "price": "1300",
+      "priceCurrency": "RUB"
+    },
+    {
+      "@type": "Offer",
+      "itemOffered": {
+        "@type": "Service",
+        "name": "Стрижка детская от 5 до 16 лет"
+      },
+      "price": "1500",
+      "priceCurrency": "RUB"
+    },
+    {
+      "@type": "Offer",
+      "itemOffered": {
+        "@type": "Service",
+        "name": "Стрижка «Отец и сын»"
+      },
+      "price": "2700",
+      "priceCurrency": "RUB"
+    },
+    {
+      "@type": "Offer",
+      "itemOffered": {
+        "@type": "Service",
+        "name": "Оформление бороды и усов"
+      },
+      "price": "1300",
+      "priceCurrency": "RUB"
+    },
+    {
+      "@type": "Offer",
+      "itemOffered": {
+        "@type": "Service",
+        "name": "Экспресс-бритьё головы"
+      },
+      "price": "700",
+      "priceCurrency": "RUB"
+    },
+    {
+      "@type": "Offer",
+      "itemOffered": {
+        "@type": "Service",
+        "name": "Экспресс-бритьё лица"
+      },
+      "price": "600",
+      "priceCurrency": "RUB"
+    },
+    {
+      "@type": "Offer",
+      "itemOffered": {
+        "@type": "Service",
+        "name": "Комплекс — стрижка и оформление бороды"
+      },
+      "price": "2500",
+      "priceCurrency": "RUB"
+    },
+    {
+      "@type": "Offer",
+      "itemOffered": {
+        "@type": "Service",
+        "name": "Комплекс студента — стрижка и оформление бороды"
+      },
+      "price": "2300",
+      "priceCurrency": "RUB"
+    }
+  ],
+  "review": [
+    {
+      "@type": "Review",
+      "author": {
+        "@type": "Person",
+        "name": "Сергей С."
+      },
+      "reviewRating": {
+        "@type": "Rating",
+        "ratingValue": "5",
+        "bestRating": "5"
+      },
+      "reviewBody": "Рекомендую Мансура как опытного, профессионального барбера в Екатеринбурге. Всегда индивидуальный подход к каждому клиенту, стремление к новому и максимальная клиентоориентированность!"
+    },
+    {
+      "@type": "Review",
+      "author": {
+        "@type": "Person",
+        "name": "Данил Зерницын"
+      },
+      "reviewRating": {
+        "@type": "Rating",
+        "ratingValue": "5",
+        "bestRating": "5"
+      },
+      "reviewBody": "Мансур профессионал своего дела, стригусь у него на протяжении 3 лет. Любую длину стрижет просто отлично, оформление бороды всегда на высоте. Тот самый мастер, который услышит ваши пожелания и воплотит их в реальность!"
+    },
+    {
+      "@type": "Review",
+      "author": {
+        "@type": "Person",
+        "name": "Сергей Косолапов"
+      },
+      "reviewRating": {
+        "@type": "Rating",
+        "ratingValue": "5",
+        "bestRating": "5"
+      },
+      "reviewBody": "Ещё с первой стрижки сказал, как будет лучше для формы моей головы и лица, предложил варианты, а после дал советы по уходу. С того момента стригусь только у Мансура — настоящий мастер своего дела!"
+    },
+    {
+      "@type": "Review",
+      "author": {
+        "@type": "Person",
+        "name": "Елена З."
+      },
+      "reviewRating": {
+        "@type": "Rating",
+        "ratingValue": "5",
+        "bestRating": "5"
+      },
+      "reviewBody": "Мансур воспитанный и тактичный мастер. Стрижка получилась аккуратная, переходы ровные с чёткими окантовками. Сделал лучше, чем можно представить!"
+    }
+  ]
+}
+</script>
+
+<script>
+(() => {
+  "use strict";
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const navH = () => parseInt(getComputedStyle(document.documentElement).getPropertyValue("--nav-h")) || 72;
+
+  document.getElementById("year").textContent = new Date().getFullYear();
+
+  /* --- мобильное меню --- */
+  const burger = document.querySelector(".burger");
+  const menu   = document.getElementById("menu");
+  const setMenu = open => {
+    burger.setAttribute("aria-expanded", String(open));
+    menu.dataset.open = String(open);
+    burger.setAttribute("aria-label", open ? "Закрыть меню" : "Открыть меню");
+  };
+  burger.addEventListener("click", () => setMenu(burger.getAttribute("aria-expanded") !== "true"));
+  menu.addEventListener("click", e => { if (e.target.closest("a")) setMenu(false); });
+  addEventListener("keydown", e => { if (e.key === "Escape") setMenu(false); });
+
+  /* --- плавная прокрутка с учётом высоты шапки --- */
+  document.querySelectorAll('a[href^="#"]').forEach(link => {
+    link.addEventListener("click", e => {
+      const id = link.getAttribute("href");
+      if (id.length < 2) return;
+      const target = document.querySelector(id);
+      if (!target) return;
+      e.preventDefault();
+      scrollTo({ top: target.getBoundingClientRect().top + scrollY - navH(),
+                 behavior: reduced ? "auto" : "smooth" });
+      history.replaceState(null, "", id);
+    });
+  });
+
+  /* --- подсветка активного пункта меню --- */
+  const links = [...document.querySelectorAll('.nav__links a[href^="#"]')];
+  const sections = links.map(a => document.querySelector(a.getAttribute("href"))).filter(Boolean);
+  if (sections.length) {
+    const spy = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        links.forEach(a => a.removeAttribute("aria-current"));
+        const active = links.find(a => a.getAttribute("href") === "#" + entry.target.id);
+        if (active) active.setAttribute("aria-current", "true");
+      });
+    }, { rootMargin: "-45% 0px -50% 0px" });
+    sections.forEach(s => spy.observe(s));
+  }
+
+  /* --- появление блоков при скролле; data-anim-chain даёт каскад --- */
+  const animated = [...document.querySelectorAll("[data-anim]")];
+
+  document.querySelectorAll("[data-anim-chain]").forEach(group => {
+    const kids = group.matches("[data-anim]")
+      ? group.querySelectorAll(":scope > *")
+      : group.querySelectorAll(":scope > [data-anim]");
+    const step = reduced ? 0.04 : 0.09;
+    kids.forEach((kid, i) => { kid.style.transitionDelay = Math.min(i * step, 0.9) + "s"; });
+  });
+
+  const pending = new Set(animated);
+  const show = el => {
+    el.classList.add("is-in");
+    pending.delete(el);
+    io.unobserve(el);
+  };
+
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => { if (entry.isIntersecting) show(entry.target); });
+  }, { rootMargin: "0px 0px -8% 0px" });
+  animated.forEach(el => io.observe(el));
+
+  /* Страховка. При быстром пролистывании наблюдатель не успевает заметить
+     блоки, которые пронеслись мимо за один кадр, — без этого они остались бы
+     прозрачными навсегда, и текст пропал бы со страницы. Досматриваем всё,
+     что уже поднялось выше нижней кромки экрана. */
+  let queued = false;
+  const sweep = () => {
+    queued = false;
+    const bottom = innerHeight;
+    [...pending].forEach(el => {
+      if (el.getBoundingClientRect().top < bottom) show(el);
+    });
+    if (!pending.size) {
+      removeEventListener("scroll", onMove);
+      removeEventListener("resize", onMove);
+    }
+  };
+  const onMove = () => {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(sweep);
+  };
+  addEventListener("scroll", onMove, { passive: true });
+  addEventListener("resize", onMove, { passive: true });
+  addEventListener("load", sweep);
+  setTimeout(sweep, 1200);   // на случай, если картинки сдвинули вёрстку
+
+  /* --- слайдеры «до / после» --- */
+  document.querySelectorAll(".ba").forEach(ba => {
+    let dragging = false;
+    const apply = pct => {
+      const v = Math.min(100, Math.max(0, pct));
+      ba.style.setProperty("--pos", v + "%");
+      ba.setAttribute("aria-valuenow", Math.round(v));
+    };
+    const fromEvent = e => {
+      const r = ba.getBoundingClientRect();
+      apply(((e.clientX - r.left) / r.width) * 100);
+    };
+    ba.addEventListener("pointerdown", e => { dragging = true; ba.setPointerCapture(e.pointerId); fromEvent(e); });
+    ba.addEventListener("pointermove", e => { if (dragging) fromEvent(e); });
+    ba.addEventListener("pointerup",     () => { dragging = false; });
+    ba.addEventListener("pointercancel", () => { dragging = false; });
+    ba.addEventListener("keydown", e => {
+      const now = Number(ba.getAttribute("aria-valuenow"));
+      const step = e.shiftKey ? 10 : 2;
+      if (e.key === "ArrowLeft")  { apply(now - step); e.preventDefault(); }
+      if (e.key === "ArrowRight") { apply(now + step); e.preventDefault(); }
+      if (e.key === "Home")       { apply(0);   e.preventDefault(); }
+      if (e.key === "End")        { apply(100); e.preventDefault(); }
+    });
+  });
+
+  /* --- лайтбокс галереи --- */
+  const box   = document.getElementById("lightbox");
+  const inner = box.querySelector(".lightbox__inner");
+  document.querySelectorAll(".zoom").forEach(btn => {
+    btn.addEventListener("click", () => {
+      inner.replaceChildren(btn.firstElementChild.cloneNode(true));
+      box.showModal();
+    });
+  });
+  box.querySelector(".lightbox__close").addEventListener("click", () => box.close());
+  box.addEventListener("click", e => { if (e.target === box) box.close(); });
+})();
+</script>
+
+</body>
+</html>
