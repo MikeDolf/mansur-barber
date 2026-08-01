@@ -413,7 +413,7 @@ img{max-width:100%;height:auto;display:block}
    КАРТА И КОНТАКТЫ
    ========================================================================== */
 .map{border-radius:var(--r-md);overflow:hidden;background:var(--ink)}
-.map iframe{display:block;width:100%;height:clamp(300px,42vw,440px);border:0}   /* карта цветная — намеренно */
+.map iframe{display:block;width:100%;height:clamp(300px,42vw,440px);border:0;filter:grayscale(1)}
 .map__stub{
   height:clamp(300px,42vw,440px);display:grid;place-items:center;gap:.75rem;
   text-align:center;color:rgba(255,255,255,.85);padding:2rem;
@@ -457,26 +457,29 @@ img{max-width:100%;height:auto;display:block}
    ========================================================================== */
 /* Прячем только при работающем скрипте: если он не выполнится,
    страница останется полностью читаемой, а не пустой. */
+/* Кривая «expo out»: резкий старт и долгое мягкое торможение.
+   Именно это торможение читается как дорогая анимация, а не линейный сдвиг. */
 .js [data-anim]{
   opacity:0;
-  transition:opacity .9s cubic-bezier(.16,.84,.44,1),
-             transform .9s cubic-bezier(.16,.84,.44,1);
+  transition:opacity 1.1s cubic-bezier(.16,1,.3,1),
+             transform 1.1s cubic-bezier(.16,1,.3,1);
+  will-change:transform,opacity;
 }
-.js [data-anim="zoomin"]     {transform:scale(.86)}
-.js [data-anim="fadeinright"]{transform:translateX(80px)}
-.js [data-anim="fadeinleft"] {transform:translateX(-80px)}
-.js [data-anim="fadeindown"] {transform:translateY(-55px)}
-.js [data-anim="fadeinup"]   {transform:translateY(55px)}
-.js [data-anim].is-in{opacity:1;transform:none}
+.js [data-anim="zoomin"]     {transform:scale(.88)}
+.js [data-anim="fadeinright"]{transform:translateX(110px)}
+.js [data-anim="fadeinleft"] {transform:translateX(-110px)}
+.js [data-anim="fadeindown"] {transform:translateY(-60px)}
+.js [data-anim="fadeinup"]   {transform:translateY(60px)}
+.js [data-anim].is-in{opacity:1;transform:none;will-change:auto}
 
 /* На телефоне разбег меньше: там до края экрана ближе и длинный сдвиг
    читается как рывок. */
 @media (max-width:640px){
-  .js [data-anim="fadeinright"]{transform:translateX(46px)}
-  .js [data-anim="fadeinleft"] {transform:translateX(-46px)}
-  .js [data-anim="fadeindown"] {transform:translateY(-38px)}
-  .js [data-anim="fadeinup"]   {transform:translateY(38px)}
-  .js [data-anim="zoomin"]     {transform:scale(.9)}
+  .js [data-anim="fadeinright"]{transform:translateX(64px)}
+  .js [data-anim="fadeinleft"] {transform:translateX(-64px)}
+  .js [data-anim="fadeindown"] {transform:translateY(-40px)}
+  .js [data-anim="fadeinup"]   {transform:translateY(40px)}
+  .js [data-anim="zoomin"]     {transform:scale(.92)}
 }
 
 @media (prefers-reduced-motion:reduce){
@@ -537,12 +540,12 @@ img{max-width:100%;height:auto;display:block}
 <!-- ================= О МАСТЕРЕ ================= -->
 <section class="band band--paper band--first" id="about">
   <div class="shell split split--flip">
-    <div class="split__media" data-anim="fadeinleft">
+    <div class="split__media" data-anim="fadeinright">
       <!-- Первый экран: грузим сразу и в приоритете, ленивая загрузка тут вредит -->
       <img class="photo" src="img/master.jpg" width="590" height="808"
            alt="Мансур — барбер, Екатеринбург" fetchpriority="high" decoding="async">
     </div>
-    <div class="split__copy center" data-anim="fadeinright" data-anim-chain>
+    <div class="split__copy center" data-anim="fadeinleft" data-anim-chain>
       <h1 class="display">Приветствую, я Мансур —<br>барбер из Екатеринбурга</h1>
       <p>Стригу мужские, студенческие и детские стрижки. Оформляю бороду и усы, делаю экспресс-бритьё лица и головы.</p>
       <p>Индивидуальный подход к каждому: подберём стрижку под ваш стиль и образ, а не под то, что модно в этом сезоне.</p>
@@ -563,11 +566,11 @@ img{max-width:100%;height:auto;display:block}
 <!-- ================= ЗАЧЕМ ================= -->
 <section class="band band--paper">
   <div class="shell split">
-    <div class="split__copy" data-anim="fadeinright" data-anim-chain>
+    <div class="split__copy" data-anim="fadeinleft" data-anim-chain>
       <h2 class="h2">Каждый современный мужчина хочет чувствовать себя увереннее.</h2>
       <p class="lead measure">Самый быстрый и действенный способ получить <strong>+100000 к уверенности</strong> — свежая качественная стрижка.</p>
     </div>
-    <div class="split__media" data-anim="fadeinleft">
+    <div class="split__media" data-anim="fadeinright">
       <img class="photo photo--portrait" src="img/process.webp" width="960" height="1280"
            alt="Мужчина со свежей стрижкой у входа в салон OXYGEN" loading="lazy" decoding="async">
     </div>
@@ -754,7 +757,7 @@ img{max-width:100%;height:auto;display:block}
 <!-- ================= ГРАФИК ================= -->
 <section class="band band--dim" id="schedule">
   <div class="shell split">
-    <div class="split__copy" data-anim="fadeinright" data-anim-chain>
+    <div class="split__copy" data-anim="fadeinleft" data-anim-chain>
       <h2 class="h2">График работы</h2>
 
       <ul class="days" aria-label="Дни работы">
@@ -767,7 +770,7 @@ img{max-width:100%;height:auto;display:block}
       <p class="measure">Записывайтесь онлайн или пишите в WhatsApp, Telegram и MAX — подберём удобное время.</p>
       <p><a class="btn btn--ondark" href="https://taplink.cc/manszbarber" target="_blank" rel="noopener"><span>Записаться</span></a></p>
     </div>
-    <div class="split__media" data-anim="fadeinleft">
+    <div class="split__media" data-anim="fadeinright">
       <img class="photo photo--md" src="img/studio-2.webp" width="960" height="1280"
            alt="Рабочее место барбера: кресло и зеркало в салоне OXYGEN" loading="lazy" decoding="async">
     </div>
@@ -1107,6 +1110,15 @@ img{max-width:100%;height:auto;display:block}
     const step = reduced ? 0.04 : 0.09;
     kids.forEach((kid, i) => { kid.style.transitionDelay = Math.min(i * step, 0.9) + "s"; });
   });
+
+  /* Первый экран не выскакивает целиком: то, что видно сразу при загрузке,
+     заезжает по очереди с небольшим шагом — страница будто собирается. */
+  animated
+    .filter(el => el.getBoundingClientRect().top < innerHeight)
+    .forEach((el, i) => {
+      const base = parseFloat(el.style.transitionDelay) || 0;
+      el.style.transitionDelay = (base + 0.15 + i * 0.13).toFixed(2) + "s";
+    });
 
   const pending = new Set(animated);
   const show = el => {
