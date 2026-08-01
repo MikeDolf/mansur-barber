@@ -30,13 +30,13 @@ HERE = Path(__file__).parent
 SRC = HERE / "index.html"
 DST = HERE / "preview.html"
 
-MAP_STUB = '''    <div class="map" data-anim="zoomin">
-      <div class="map__stub">
-        <strong>Здесь карта Яндекса</strong>
-        <span>В превью она не грузится: площадка блокирует внешние адреса.
-        В index.html на этом месте рабочий код карты — на хостинге она откроется.</span>
-      </div>
-    </div>'''
+MAP_STUB = '''      <div class="map">
+        <div class="map__stub">
+          <strong>Здесь карта Яндекса</strong>
+          <span>В превью она не грузится: площадка блокирует внешние адреса.
+          В index.html на этом месте рабочий код карты — на хостинге она откроется.</span>
+        </div>
+      </div>'''
 
 
 MAX_EDGE = 900     # больше в превью не нужно, а вес растёт заметно
@@ -100,7 +100,7 @@ def main() -> int:
     # внутри них сбивают вшивание картинок
     body = re.sub(r"<!--.*?-->", "", body, flags=re.S)
 
-    map_block = re.search(r'    <div class="map" data-anim="zoomin">.*?\n    </div>', body, re.S)
+    map_block = re.search(r'      <div class="map">.*?\n      </div>', body, re.S)
     if map_block:
         body = body.replace(map_block.group(0), MAP_STUB)
     else:
