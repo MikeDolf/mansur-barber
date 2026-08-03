@@ -134,6 +134,12 @@ img{
   content:"";position:absolute;left:calc(-1 * (var(--inset) - var(--rail)) - 3.5px);top:.4rem;
   width:7px;height:7px;background:var(--brass);transform:rotate(45deg);
 }
+/* На узких экранах поля колонки почти нулевые, и засечка по этой формуле
+   уезжала за левый край — оставался обрезанный треугольник. Здесь она
+   ложится ровно на нить. */
+@media (max-width:640px){
+  .sect-head::before{left:calc(-1 * var(--rail) + 2px)}
+}
 
 /* отступ от нити — общий для всех текстовых колонок */
 :root{ --inset: calc(var(--rail) + clamp(1.25rem, 3vw, 2.75rem)) }
@@ -290,7 +296,7 @@ img{
   position:relative;display:grid;place-items:center;
   background:
     repeating-linear-gradient(135deg,rgba(194,160,92,.055) 0 10px,transparent 10px 20px),
-    var(--ink-raise);
+    rgba(23,19,13,.82);
   border:1px solid var(--hairline);
   color:var(--brass-deep);aspect-ratio:4/5;
 }
@@ -400,7 +406,7 @@ img{
 .reviews{display:grid;gap:clamp(.875rem,1.8vw,1.25rem);grid-template-columns:repeat(2,1fr);align-items:start}
 @media (max-width:820px){.reviews{grid-template-columns:1fr}}
 .review{
-  background:var(--ink-raise);border:1px solid var(--hairline);
+  background:rgba(23,19,13,.74);border:1px solid var(--hairline);
   padding:clamp(1.5rem,3vw,2.25rem);
   display:grid;gap:1rem;transition:border-color .4s ease;
 }
@@ -480,6 +486,29 @@ img{
 .footer a:hover{border-color:var(--brass-deep);color:var(--brass)}
 
 /* ==========================================================================
+   ЗВЁЗДНОЕ ПОЛЕ — основа сайта
+
+   Сцена лежит неподвижным полотном под всей страницей, содержимое едет
+   поверх. Между ними — пелена: на первом экране почти прозрачная, чтобы
+   звёзды работали в полную силу, ниже густеет, иначе текст читать нечем.
+   Плотностью пелены управляет js/scene.js.
+
+   Если сцена не загрузилась или отключена — под содержимым остаётся
+   ровный угольный фон body, и сайт выглядит ровно так же, как без неё.
+   ========================================================================== */
+.scene,.veil{position:fixed;inset:0;z-index:0;pointer-events:none}
+.scene{
+  width:100%;height:100%;display:block;
+  opacity:0;transition:opacity 1.4s ease;
+}
+.scene.is-on{opacity:1}
+.veil{background:var(--ink);opacity:0;transition:opacity .3s linear}
+
+/* Содержимое — слоем выше сцены. Шапки здесь нет намеренно: у неё своё
+   position:fixed и z-index:100, и переписывать их этим правилом нельзя. */
+main,.footer{position:relative;z-index:1}
+
+/* ==========================================================================
    ПОЯВЛЕНИЕ БЛОКОВ
    ========================================================================== */
 .js [data-anim]{
@@ -508,6 +537,9 @@ img{
 </head>
 <body>
 <script>document.documentElement.classList.add("js")</script>
+
+<canvas class="scene" id="scene" aria-hidden="true"></canvas>
+<div class="veil" aria-hidden="true"></div>
 
 <a class="skip" href="#main">Перейти к содержимому</a>
 
@@ -1066,6 +1098,31 @@ img{
   });
   box.querySelector(".lightbox__close").addEventListener("click", () => box.close());
   box.addEventListener("click", e => { if (e.target === box) box.close(); });
+})();
+</script>
+
+<!-- ================= ЗВЁЗДНЫЙ ФОН =================
+     Файл сцены весит немало, поэтому он не подключён тегом, а
+     запрашивается отсюда — и только там, где уместен. Телефон с
+     включённым «уменьшить движение», экономией трафика, слабой
+     памятью или медленной сетью не скачивает его вовсе: сайт при
+     этом полностью работоспособен, под содержимым просто ровный фон.
+     Старые браузеры игнорируют type="module" целиком.            -->
+<script type="module">
+(() => {
+  "use strict";
+  const canvas = document.getElementById("scene");
+  const veil   = document.querySelector(".veil");
+  const off = () => { if (canvas) canvas.remove(); if (veil) veil.remove(); };
+
+  const conn = navigator.connection || {};
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches
+      || conn.saveData === true
+      || /(^|-)2g$/.test(conn.effectiveType || "")
+      || (navigator.deviceMemory && navigator.deviceMemory <= 2)) { off(); return; }
+
+  /* Ошибка загрузки или отсутствие WebGL — тихо убираем слой. */
+  import("./js/scene.js").catch(off);
 })();
 </script>
 

@@ -13,7 +13,9 @@ preview.html — тот же сайт для просмотра по ссылк�
   * снимается обёртка <!doctype>/<html>/<head> — площадка добавляет свою;
   * убирается разметка для поисковиков (в превью не нужна);
   * карта Яндекса подменяется заглушкой — iframe всё равно не загрузится;
-  * картинки из img/ вшиваются прямо в страницу (data:), иначе не покажутся.
+  * картинки из img/ вшиваются прямо в страницу (data:), иначе не покажутся;
+  * звёздный фон вшивается тем же способом: на боевом сайте он лежит
+    в js/scene.js и подгружается отдельно, а соседние файлы превью недоступны.
 
 Никакого ручного редактирования preview.html: любое изменение вносится
 в index.html, потом запускается этот скрипт.
@@ -38,6 +40,8 @@ MAP_STUB = '''      <div class="map">
         </div>
       </div>'''
 
+
+SCENE = HERE / "js" / "scene.js"
 
 MAX_EDGE = 900     # больше в превью не нужно, а вес растёт заметно
 MAX_BYTES = 120_000  # base64 раздувает ещё на треть, поэтому тяжёлое пережимаем
@@ -106,6 +110,28 @@ def main() -> int:
     else:
         print("！ блок карты не найден — превью соберётся, но проверьте вёрстку", file=sys.stderr)
 
+    # звёздный фон: вместо загрузчика вшиваем саму сцену
+    scene_inlined = False
+    loader = re.search(r'<script type="module">.*?</script>', body, re.S)
+    if loader and SCENE.is_file():
+        code = SCENE.read_text(encoding="utf-8")
+        # закрывающий тег внутри строки в коде разорвал бы <script> раньше времени
+        code = code.replace("</script", "<\\/script")
+        body = body.replace(
+            loader.group(0),
+            '<script type="module">\n'
+            '/* Сцена вшита сборщиком превью. На сайте она грузится из js/scene.js. */\n'
+            'if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {\n'
+            f"{code}\n"
+            "} else {\n"
+            '  document.getElementById("scene")?.remove();\n'
+            '  document.querySelector(".veil")?.remove();\n'
+            "}\n</script>",
+        )
+        scene_inlined = True
+    elif not SCENE.is_file():
+        print("！ нет js/scene.js — превью соберётся без звёздного фона", file=sys.stderr)
+
     body, pics, pic_bytes = inline_images(body)
 
     DST.write_text(f"<title>{title}</title>\n{style}\n{body.strip()}\n", encoding="utf-8")
@@ -115,6 +141,7 @@ def main() -> int:
     print(f"  отзывов в разметке: {len(data.get('review', []))}")
     print(f"  карта в превью: заглушка, в index.html: {'iframe' if 'map-widget' in html else 'НЕТ'}")
     print(f"  вшито картинок: {pics} ({pic_bytes / 1024:.1f} КБ)")
+    print(f"  звёздный фон: {'вшит' if scene_inlined else 'НЕТ'}")
     left = len(re.findall(r'class="ph[ "]', body))
     print(f"  осталось заглушек под фото: {left}")
     return 0
