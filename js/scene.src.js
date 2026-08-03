@@ -39,9 +39,9 @@ const CONFIG = {
   colorA:     '#C2A05C',   // --brass
   colorB:     '#8C6E36',   // --brass-deep
   colorC:     '#EAE3D6',   // --bone
-  opacity:    1.5,
-  pointSize:  50,
-  brightness: 1.3,
+  opacity:    2.1,
+  pointSize:  64,
+  brightness: 1.75,
   drift:      1.6,         // ровный ход «тоннеля»
   twinkle:    1,
   spin:       0.02,        // вращение вокруг оси взгляда
@@ -53,17 +53,18 @@ const CONFIG = {
   parallax:   0.35,        // сдвиг камеры за курсором
 };
 
-/* Плотность звёзд по ширине экрана: на телефоне столько же точек рисовать
-   незачем — они всё равно сливаются, а батарею едят так же. */
+/* Плотность звёзд по ширине экрана. На телефоне точек меньше, но ненамного:
+   экран узкий, в кадр попадает меньшая часть коробки, и при сильном
+   прореживании небо становится пустым. */
 const COUNT_WIDE   = 4200;
-const COUNT_NARROW = 1700;
+const COUNT_NARROW = 2900;
 const NARROW_AT    = 820;
 
 /* Вуаль: чёрная пелена между сценой и содержимым. На первом экране почти
    прозрачная — звёзды видно во всю силу; ниже густеет, чтобы текст читался. */
-const VEIL_TOP    = 0.14;
-const VEIL_BODY   = 0.80;
-const VEIL_FOOTER = 0.55;
+const VEIL_TOP    = 0.05;
+const VEIL_BODY   = 0.62;
+const VEIL_FOOTER = 0.36;
 
 const LAYERS = { NONE: 0, TORUS_SCENE: 1, BLOOM_SCENE: 2, ENTIRE_SCENE: 3 };
 
@@ -139,6 +140,7 @@ const material = new THREE.ShaderMaterial({
   uniforms: {
     uTime:          { value: 0 },
     uSize:          { value: CONFIG.pointSize },
+    uPixelRatio:    { value: dpr() },
     uOpacity:       { value: 0 },
     uDrift:         { value: 0 },
     uDepth:         { value: depth },
@@ -153,7 +155,7 @@ const material = new THREE.ShaderMaterial({
     uBrightness:    { value: CONFIG.brightness },
   },
   vertexShader: /* glsl */`
-uniform float uTime; uniform float uSize; uniform float uDrift; uniform float uDepth; uniform float uTwinkle;
+uniform float uTime; uniform float uSize; uniform float uPixelRatio; uniform float uDrift; uniform float uDepth; uniform float uTwinkle;
 uniform vec3 uCursor; uniform float uRepelRadius; uniform float uRepelStrength; uniform float uActivity;
 uniform vec3 uColorA; uniform vec3 uColorB; uniform vec3 uColorC;
 attribute float aScale; attribute float aPhase; attribute float aPalette; attribute float aBright;
@@ -175,7 +177,10 @@ void main() {
 
   vec4 viewPosition = viewMatrix * modelPosition;
   gl_Position = projectionMatrix * viewPosition;
-  gl_PointSize = uSize * aScale;
+  // Размер точки задаётся в пикселях устройства. Без множителя на плотность
+  // экрана звёзды на ретине выходят во столько же раз мельче — из-за этого
+  // на телефоне их почти не было видно.
+  gl_PointSize = uSize * aScale * uPixelRatio;
   gl_PointSize *= (1.0 / -viewPosition.z);
 
   vec3 base = aPalette < 0.5 ? uColorA : (aPalette < 1.5 ? uColorB : uColorC);
@@ -381,14 +386,16 @@ function updateScene() {
 /* ==========================================================================
    ЦИКЛ ОТРИСОВКИ
 
-   Кадры считаются только когда вкладка на виду. Если устройство не тянет —
-   сначала падает плотность пикселей, а если и это не помогает, сцена
-   выключается совсем: сайт важнее фона.
+   Кадры считаются только когда вкладка на виду. Если устройство не тянет,
+   сцена уступает по шагам: сначала чёткость, потом плотность звёзд, и лишь
+   в последнюю очередь выключается совсем — сайт важнее фона. Гасить сразу
+   нельзя: фон тут — основа оформления, а первые секунды тормозит почти
+   любой телефон, пока раскладывает страницу.
    ========================================================================== */
 let running = true;
 let frames = 0;
 let checkFrom = performance.now();
-let stage = -1;              // -1 — прогрев, 0 — первая проверка, 1 — после снижения, 2 — хватит
+let stage = -1;              // -1 — прогрев, дальше по шагам уступок, 3 — хватит проверять
 
 function stop() {
   running = false;
@@ -402,8 +409,14 @@ function stop() {
   }, 1300);
 }
 
+function setRatio(r) {
+  renderer.setPixelRatio(r);
+  for (const c of [torusComposer, bloomComposer, finalComposer]) c.setPixelRatio(r);
+  material.uniforms.uPixelRatio.value = r;   // иначе звёзды поменяют размер
+}
+
 function watchdog(now) {
-  if (stage > 1) return;
+  if (stage > 2) return;
 
   /* Первые две секунды не в счёт: страница ещё раскладывает картинки
      и шрифты, кадры в это время проседают у кого угодно. */
@@ -420,13 +433,16 @@ function watchdog(now) {
   frames = 0;
   checkFrom = now;
 
+  if (fps >= 26) { stage = 3; return; }      // тянет — больше не мешаем
+
   if (stage === 0) {
-    if (fps < 26) { renderer.setPixelRatio(1); for (const c of [torusComposer, bloomComposer, finalComposer]) c.setPixelRatio(1); }
-    stage = 1;
-  } else {
-    if (fps < 22) stop();
-    stage = 2;
+    setRatio(1);                             // шаг 1: чёткость
+  } else if (stage === 1) {
+    geometry.setDrawRange(0, Math.round(count * 0.6));   // шаг 2: плотность
+  } else if (fps < 20) {
+    stop();                                  // шаг 3: сдаёмся
   }
+  stage++;
 }
 
 function animate() {
@@ -477,16 +493,13 @@ window.addEventListener('resize', () => {
     const h = window.innerHeight;
     const r = stage <= 0 ? dpr() : Math.min(dpr(), renderer.getPixelRatio());
 
-    renderer.setPixelRatio(r);
+    setRatio(r);
     renderer.setSize(w, h, false);
 
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
 
-    for (const composer of [torusComposer, bloomComposer, finalComposer]) {
-      composer.setPixelRatio(r);
-      composer.setSize(w, h);
-    }
+    for (const composer of [torusComposer, bloomComposer, finalComposer]) composer.setSize(w, h);
 
     readScroll();
   }, 150);
