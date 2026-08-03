@@ -18,9 +18,6 @@ import * as THREE from 'three';
 import { EffectComposer }        from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass }            from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { ShaderPass }            from 'three/examples/jsm/postprocessing/ShaderPass.js';
-import { UnrealBloomPass }       from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
-import { GammaCorrectionShader } from 'three/examples/jsm/shaders/GammaCorrectionShader.js';
-import { CopyShader }            from 'three/examples/jsm/shaders/CopyShader.js';
 
 /* ==========================================================================
    НАСТРОЙКИ
@@ -83,12 +80,14 @@ const canvas = document.getElementById('scene');
 const veil   = document.querySelector('.veil');
 const hero   = document.getElementById('hero');
 
-/* Плотность пикселей: на ретине рисовать в полное разрешение при трёх
-   проходах свечения — верный способ посадить телефон. */
+/* Плотность пикселей: рисовать сцену в полное разрешение ретины незачем —
+   звёзды мягкие, разницы не видно, а работы враза больше. */
 const dpr = () => Math.min(window.devicePixelRatio || 1,
                            window.innerWidth <= NARROW_AT ? 1.25 : 1.5);
 
-const renderer = new THREE.WebGL1Renderer({ canvas, antialias: true, powerPreference: 'low-power' });
+/* Сглаживание не включаем: рисуются мягкие точки, краёв у них нет,
+   а MSAA на телефоне стоит заметно дороже, чем даёт. */
+const renderer = new THREE.WebGL1Renderer({ canvas, antialias: false, powerPreference: 'low-power' });
 renderer.setPixelRatio(dpr());
 renderer.setSize(window.innerWidth, window.innerHeight, false);
 
@@ -215,9 +214,6 @@ const FinalPass = {
   uniforms: {
     iTime:        { value: 0 },
     tDiffuse:     { value: null },
-    torusTexture: { value: null },
-    bloomTexture: { value: null },
-    haloTexture:  { value: null },
     uBg:       { value: hexToVec3(CONFIG.bgColor) },
     uFlameA:   { value: hexToVec3(CONFIG.flameColor) },
     uFlameB:   { value: hexToVec3(CONFIG.flameColor2) },
@@ -227,7 +223,7 @@ const FinalPass = {
 varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position, 1.0); }
   `,
   fragmentShader: /* glsl */`
-uniform float iTime; uniform sampler2D tDiffuse; uniform sampler2D bloomTexture; uniform sampler2D torusTexture; uniform sampler2D haloTexture;
+uniform float iTime; uniform sampler2D tDiffuse;
 uniform vec3 uBg; uniform vec3 uFlameA; uniform vec3 uFlameB; uniform float uFlameAmt;
 varying vec2 vUv;
 vec3 warp3d(vec3 pos, float t){ float curv=.8,a=1.9,b=0.7; pos*=2.;
@@ -237,44 +233,39 @@ vec3 warp3d(vec3 pos, float t){ float curv=.8,a=1.9,b=0.7; pos*=2.;
   return 0.5+0.5*cos(pos.xyz+vec3(1,2,4)); }
 void main(){
   vec2 uv = 2.*vUv - 1.;
-  vec3 w = pow(warp3d(vec3(uv.x, sin(uv.y), uv.y), iTime*1.5), vec3(1.5));
-  vec3 flame = 1.5*uFlameA*w.x; flame*=w.y; flame += uFlameB*w.z;
-  flame *= smoothstep(0.25, 1., abs(uv.y));
-  float md = smoothstep(-0.7, 1., -uv.y*uv.x); flame *= md*md;
+  // Ветка не для красоты: warp3d — это восемнадцать синусов на каждый
+  // пиксель экрана, и когда всполохи выключены, считать их незачем.
+  vec3 flame = vec3(0.0);
+  if (uFlameAmt > 0.001) {
+    vec3 w = pow(warp3d(vec3(uv.x, sin(uv.y), uv.y), iTime*1.5), vec3(1.5));
+    flame = 1.5*uFlameA*w.x; flame*=w.y; flame += uFlameB*w.z;
+    flame *= smoothstep(0.25, 1., abs(uv.y));
+    float md = smoothstep(-0.7, 1., -uv.y*uv.x); flame *= md*md;
+  }
   vec3 bg = uBg * (1.0 - 0.4 * length(uv));
-  vec3 halo = texture2D(haloTexture, vUv).xyz;
-  gl_FragColor = vec4(bg + flame*uFlameAmt + texture2D(bloomTexture, vUv).xyz + texture2D(torusTexture, vUv).xyz + texture2D(tDiffuse, vUv).xyz + halo, 1.);
+  gl_FragColor = vec4(bg + flame*uFlameAmt + texture2D(tDiffuse, vUv).xyz, 1.);
 }
   `,
 };
 
 /* ==========================================================================
-   ТРИ КОМПОЗЕРА НА ОДНОМ RenderPass
+   КОМПОЗЕР
+
+   В исходной сцене, с которой всё срисовано, было три композера: два из них
+   собирали свечение вокруг тора, лежавшего на служебных слоях. Тора здесь
+   нет — звёзды светятся сами, своим спрайтом. Проверено выводом на экран:
+   те два прохода давали идеально чёрный кадр, но каждый кадр честно считали
+   по цепочке размытий на весь экран. Именно из-за них фон и не тянули
+   телефоны. Остался один проход: сцена и финальная склейка с фоном.
    ========================================================================== */
 const renderScene = new RenderPass(scene, camera);
 
-const torusComposer = new EffectComposer(renderer);
-torusComposer.renderToScreen = false;
-torusComposer.addPass(renderScene);
-torusComposer.addPass(new ShaderPass(GammaCorrectionShader));
-torusComposer.addPass(new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.22, 0.2, 0));
-torusComposer.addPass(new ShaderPass(CopyShader));
-
-const bloomComposer = new EffectComposer(renderer);
-bloomComposer.renderToScreen = false;
-bloomComposer.addPass(renderScene);
-bloomComposer.addPass(new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.4, 0.55, 0));
-bloomComposer.addPass(new ShaderPass(GammaCorrectionShader));
-
 const finalPass = new ShaderPass(FinalPass);
-finalPass.uniforms.bloomTexture.value = bloomComposer.renderTarget1.texture;
-finalPass.uniforms.torusTexture.value = torusComposer.renderTarget1.texture;
 
 const finalComposer = new EffectComposer(renderer);
 finalComposer.addPass(renderScene);
 finalComposer.addPass(finalPass);
-
-for (const composer of [torusComposer, bloomComposer, finalComposer]) composer.setPixelRatio(dpr());
+finalComposer.setPixelRatio(dpr());
 
 /* ==========================================================================
    КУРСОР — «пустота», которая расталкивает звёзды
@@ -345,6 +336,13 @@ function readScroll() {
   const enter = clamp(window.scrollY / heroEnd, 0, 1);
   const tail  = max > 0 ? clamp((window.scrollY - (max - window.innerHeight * 0.9)) / (window.innerHeight * 0.9), 0, 1) : 0;
   veilTarget = lerp(lerp(VEIL_TOP, VEIL_BODY, enter), VEIL_FOOTER, tail);
+
+  /* Пелену выставляем прямо здесь, а не в цикле отрисовки: если сцена
+     замрёт, текст всё равно должен остаться читаемым. */
+  if (veil) {
+    const next = Math.round(veilTarget * 100) / 100;
+    if (next !== veilShown) { veil.style.opacity = String(next); veilShown = next; }
+  }
 }
 window.addEventListener('scroll', readScroll, { passive: true });
 window.addEventListener('resize', readScroll, { passive: true });
@@ -376,71 +374,79 @@ function updateScene() {
   material.uniforms.uOpacity.value = fade * CONFIG.opacity;
 
   group.rotation.z += dt * (CONFIG.spin + scroll * CONFIG.scrollSpin);
-
-  if (veil) {
-    const next = Math.round(veilTarget * 100) / 100;
-    if (next !== veilShown) { veil.style.opacity = String(next); veilShown = next; }
-  }
 }
 
 /* ==========================================================================
    ЦИКЛ ОТРИСОВКИ
 
    Кадры считаются только когда вкладка на виду. Если устройство не тянет,
-   сцена уступает по шагам: сначала чёткость, потом плотность звёзд, и лишь
-   в последнюю очередь выключается совсем — сайт важнее фона. Гасить сразу
-   нельзя: фон тут — основа оформления, а первые секунды тормозит почти
-   любой телефон, пока раскладывает страницу.
+   сцена уступает по шагам каждые две секунды: чёткость, плотность звёзд,
+   ещё раз чёткость вместе со всполохами, и в последнюю очередь замирает — небо остаётся на месте, но перестаёт
+   считаться каждый кадр. Замереть лучше, чем исчезнуть: фон тут основа
+   оформления, а неподвижное звёздное небо выглядит намеренным.
+   Совсем убираем канву только если браузер потерял контекст WebGL.
    ========================================================================== */
 let running = true;
 let frames = 0;
 let checkFrom = performance.now();
-let stage = -1;              // -1 — прогрев, дальше по шагам уступок, 3 — хватит проверять
+let stage = -1;              // -1 — прогрев, дальше по шагам уступок, 4 — хватит проверять
 
-function stop() {
+/* Замереть: последний кадр остаётся на экране как неподвижное небо. */
+function freeze() {
+  running = false;
+}
+
+/* Убрать совсем — на случай, когда рисовать больше нечем. */
+function teardown() {
   running = false;
   canvas.classList.remove('is-on');
-  if (veil) veil.style.opacity = '0';
+  if (veil) { veil.style.opacity = '0'; veilShown = -1; }
   setTimeout(() => {
-    renderer.dispose();
-    geometry.dispose();
-    material.dispose();
+    try { renderer.dispose(); geometry.dispose(); material.dispose(); } catch (e) { /* уже некому */ }
     canvas.remove();
+    if (veil) veil.remove();
   }, 1300);
 }
 
+/* Браузер может отобрать контекст WebGL — на телефоне это обычное дело,
+   когда памяти мало. Без обработки на месте фона осталась бы чёрная дыра. */
+canvas.addEventListener('webglcontextlost', (e) => { e.preventDefault(); teardown(); });
+
 function setRatio(r) {
   renderer.setPixelRatio(r);
-  for (const c of [torusComposer, bloomComposer, finalComposer]) c.setPixelRatio(r);
+  finalComposer.setPixelRatio(r);
   material.uniforms.uPixelRatio.value = r;   // иначе звёзды поменяют размер
 }
 
 function watchdog(now) {
-  if (stage > 2) return;
+  if (stage > 3) return;
 
   /* Первые две секунды не в счёт: страница ещё раскладывает картинки
      и шрифты, кадры в это время проседают у кого угодно. */
   if (stage === -1) {
-    if (now - checkFrom > 2000) { stage = 0; frames = 0; checkFrom = now; }
+    if (now - checkFrom > 1500) { stage = 0; frames = 0; checkFrom = now; }
     return;
   }
 
   frames++;
   const span = now - checkFrom;
-  if (span < 3500) return;
+  if (span < 2000) return;
 
   const fps = frames * 1000 / span;
   frames = 0;
   checkFrom = now;
 
-  if (fps >= 26) { stage = 3; return; }      // тянет — больше не мешаем
+  if (fps >= 26) { stage = 4; return; }                  // тянет — больше не мешаем
 
   if (stage === 0) {
-    setRatio(1);                             // шаг 1: чёткость
+    setRatio(Math.min(1, renderer.getPixelRatio()));      // шаг 1: чёткость
   } else if (stage === 1) {
-    geometry.setDrawRange(0, Math.round(count * 0.6));   // шаг 2: плотность
+    geometry.setDrawRange(0, Math.round(count * 0.6));    // шаг 2: плотность звёзд
+  } else if (stage === 2) {
+    setRatio(0.7);                                       // шаг 3: ещё вдвое меньше пикселей
+    finalPass.uniforms.uFlameAmt.value = 0;              //         и без всполохов
   } else if (fps < 20) {
-    stop();                                  // шаг 3: сдаёмся
+    freeze();                                            // шаг 4: замираем
   }
   stage++;
 }
@@ -460,12 +466,6 @@ function animate() {
 
   updatePointer();
   updateScene();
-
-  camera.layers.set(LAYERS.TORUS_SCENE);
-  torusComposer.render();
-
-  camera.layers.set(LAYERS.BLOOM_SCENE);
-  bloomComposer.render();
 
   camera.layers.set(LAYERS.ENTIRE_SCENE);
   finalComposer.render();
@@ -499,8 +499,15 @@ window.addEventListener('resize', () => {
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
 
-    for (const composer of [torusComposer, bloomComposer, finalComposer]) composer.setSize(w, h);
+    finalComposer.setSize(w, h);
 
     readScroll();
+
+    /* Если сцена замерла, кадр после смены размера никто не перерисует —
+       на экране осталась бы растянутая картинка. Рисуем один раз вручную. */
+    if (!running && canvas.isConnected) {
+      camera.layers.set(LAYERS.ENTIRE_SCENE);
+      finalComposer.render();
+    }
   }, 150);
 }, { passive: true });
